@@ -1,4 +1,4 @@
-Create Table Users(
+CREATE TABLE Users(
     user_id BIGINT AUTO_INCREMENT,
     username VARCHAR(255) NOT NULL UNIQUE,
     email VARCHAR(255) NOT NULL UNIQUE, 
