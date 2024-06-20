@@ -9,18 +9,18 @@ $errors = [];
 if (isset($_POST['submit'])) {
     require_once("./includes/library.php");
     $pdo = connectdb();
-    $query = "";
+    $query = "SELECT * FROM `users` WHERE `username` = ?";
 
     $stmt = $pdo->prepare($query);
     $stmt->execute([$username]);
     $dbrow = $stmt->fetch();
 
     if ($dbrow) {
-        if (password_verify($password, $dbrow['pwd'])) {
+        if (password_verify($password, $dbrow['password'])) {
             session_start();
             $_SESSION['username'] = $username;
-            $_SESSION['userid'] = $dbrow['userID'];
-            header("Location: address.php");
+            $_SESSION['user_id'] = $dbrow['id'];
+            header("Location: view-account.php");
             exit();
         } else {
             $errors['password'] = true;
@@ -61,7 +61,7 @@ if (isset($_POST['submit'])) {
             <div>
                 <label for="password">Password:</label>
                 <input type="password" id="password" name="password" size="25" />
-                <span class="error <?= !isset($errors['password']) ? 'hidden' : '' ?>">Your passwords was invalid</span>
+                <span class="error <?= !isset($errors['password']) ? 'hidden' : '' ?>">Your password was invalid</span>
             </div>
 
             <div>
