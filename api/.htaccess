@@ -9,7 +9,7 @@ RewriteCond %{HTTP:Authorization} ^(.*)
 RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
 
 #set the base directory for rewrite to the folder your api is in
-RewriteBase /~jamiemitchell/3430/labs/lab5/api
+RewriteBase /~damonfernandez/3430/cois-3430-2024su-a2-Blitzcranq/api
 
 #deliver the folder of file directly if it exists
 RewriteCond %{REQUEST_FILENAME} !-d
