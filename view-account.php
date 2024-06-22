@@ -28,13 +28,7 @@ function issueNewAPIKey($pdo){
     header("Location: " . $_SERVER['REQUEST_URI']);
     exit();
 
-    if(!$stmt){
-        return "There was a problem issuing a new key";
-    }
-    else{
-        //New key will now be displayed
-        return "key was successfully issued, please reload to see it!";
-    }
+
 
 
 }
