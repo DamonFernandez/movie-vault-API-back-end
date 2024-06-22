@@ -1,3 +1,9 @@
+<?php 
+require_once "./includes/library.php";
+
+checkToRedirectToLoginPage()?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>

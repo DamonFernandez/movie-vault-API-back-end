@@ -22,3 +22,49 @@ function connectdb()
 
   return $pdo;
 }
+
+function checkToRedirectToLoginPage(){
+  if(!isset($_SESSION["user_id"])){
+      header("location: login.php");
+      exit();
+  }
+}
+
+
+function genAPIKey($pdo){
+    $continueFlag = true;
+
+
+    while($continueFlag == true){
+
+      $key = bin2hex(random_bytes(32));
+      $query = "SELECT api_key FROM users WHERE api_key = ?";
+      $stmt = $pdo -> prepare($query);
+      $stmt -> execute([$key]);
+      if(!$stmt->fetch()){
+        $continueFlag = false;
+      }
+    }
+
+    return $key;
+
+}
+
+function createLogOutButton(){
+
+  echo"<form method=\"GET\"><button type=\"submit\" name=\"logOutButton\">Log Out</button></form> ";
+}
+
+function logoutUser(){
+    session_start();
+    session_destroy();
+    $_SESSION = array();
+    header("Location: login.php");
+    exit();
+}
+
+function checkForLogOut(){
+  if(isset($_GET["logOutButton"])){
+    logoutUser();
+  }
+}
