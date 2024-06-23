@@ -77,9 +77,15 @@ if($requestMethod == "GET" && $endpoint == "/completedwatchlist/entries"){
     echo $completedWatchList;
 }
 
-if($requestMethod == "GET" && $endpoint = "/completedwatchlist/entries/{id}/times-watched"){
-    $user_id = getUserID($pdo, $userApiKey);
+if($requestMethod == "GET" && $endpoint == "/completedwatchlist/entries/{id}/times-watched"){
     $completedWatchListID = extractIDFromEndpoint($endpoint);
+    $query = "SELECT numOfTimesWatched FROM completedWatchList WHERE completedWatchListID = ?";
+    $queryResultSetObject = queryDB($pdo, $query, [$completedWatchListID]);
+    $result = $queryResultSetObject -> fetch();
+    $result = json_encode($result);
+    header("Content-Type: application/json; charset=UTF-8"); 
+    header("HTTP/1.1 200 OK");
+    echo $result;
 
 }
   
