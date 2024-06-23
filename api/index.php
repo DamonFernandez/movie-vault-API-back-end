@@ -42,6 +42,17 @@ function getUserID($pdo, $userApiKey){
     return $result["user_id"];
 }
 
+function extractIDFromEndpoint($endpoint) {
+    $pattern = "/\{([^}]+)\}/";
+    // Use a regular expression to match the ID pattern in the endpoint
+    if (preg_match($pattern, $endpoint, $matches)) {
+        // Return the matched ID
+        return $matches[1];
+    }
+    // Return null if no match is found
+    return null;
+}
+
   // GLOBAL CODE
   $endpoint = getEndPoint();
   $requestMethod = $_SERVER['REQUEST_METHOD'];
@@ -66,5 +77,10 @@ if($requestMethod == "GET" && $endpoint == "/completedwatchlist/entries"){
     echo $completedWatchList;
 }
 
+if($requestMethod == "GET" && $endpoint = "/completedwatchlist/entries/{id}/times-watched"){
+    $user_id = getUserID($pdo, $userApiKey);
+    $completedWatchListID = extractIDFromEndpoint($endpoint);
+
+}
   
 ?> 
