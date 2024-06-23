@@ -55,6 +55,12 @@ function extractIDFromEndpoint($endpoint) {
 
 }
 
+function queryDB($pdo, $query, $arrayOfValuesToPass){
+    $stmt = $pdo->prepare($query);
+    $stmt->execute($arrayOfValuesToPass);
+    return $stmt;
+}
+
   // GLOBAL CODE
   $endpoint = getEndPoint();
   $requestMethod = $_SERVER['REQUEST_METHOD'];
