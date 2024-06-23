@@ -7,6 +7,8 @@ function getEndPoint(){
     $endpoint = str_replace(__BASE__, "", $uri["path"]);
     return $endpoint;
 }
+
+
 function getUserAPIKey($pdo){
     // Check that its set
     if (!isset($_SERVER['HTTP_X_API_KEY']) || empty($_SERVER['HTTP_X_API_KEY'])) {
@@ -29,11 +31,7 @@ function getUserAPIKey($pdo){
   return $userApiKey;
   }
 
-  function queryDB($pdo, $query, $arrayOfValuesToPass){
-    $stmt = $pdo -> prepare($query);
-     $stmt -> execute($arrayOfValuesToPass);
-     return $stmt;
-  }
+  
 
 function getUserID($pdo, $userApiKey){
     $query = "SELECT user_id FROM users WHERE api_key = ?";
@@ -43,14 +41,18 @@ function getUserID($pdo, $userApiKey){
 }
 
 function extractIDFromEndpoint($endpoint) {
-    $pattern = "/\{([^}]+)\}/";
-    // Use a regular expression to match the ID pattern in the endpoint
-    if (preg_match($pattern, $endpoint, $matches)) {
-        // Return the matched ID
-        return $matches[1];
+    $explodedEndpoint = explode("/", $endpoint);
+    foreach ($explodedEndpoint as $string) {
+        if(str_starts_with($string, "{")){
+            $stringToReturn = str_replace(['{', '}'], '', $string);;
+            return $stringToReturn;
+        }
     }
-    // Return null if no match is found
+
+    echo "Could not find an id ";
     return null;
+
+
 }
 
   // GLOBAL CODE
@@ -62,6 +64,8 @@ function extractIDFromEndpoint($endpoint) {
   // All endpoints that dont involve the movies table require an API key
   // So get it if the endpoint does not contain "movies" in its name
   if(!str_contains($endpoint, "movies")){
+    // Exists if valid api key is not found, preventing non auth users
+    // from doing any non-allowed requests
     $userApiKey = getUserAPIKey($pdo);
     $user_id = getUserID($pdo, $userApiKey);
   }
@@ -88,5 +92,19 @@ if($requestMethod == "GET" && $endpoint == "/completedwatchlist/entries/{id}/tim
     echo $result;
 
 }
+
+if($requestMethod == "GET" && $endpoint == "/completedwatchlist/entries/{id}/rating"){
+    $completedWatchListID = extractIDFromEndpoint($endpoint);
+    $query = "SELECT rating FROM completedWatchList WHERE completedWatchListID = ?";
+    $queryResultSetObject = queryDB($pdo, $query, [$completedWatchListID]);
+    $result = $queryResultSetObject -> fetch();
+    $result = json_encode($result);
+    header("Content-Type: application/json; charset=UTF-8"); 
+    header("HTTP/1.1 200 OK");
+    echo $result;
+
+}
+
+
   
 ?> 
