@@ -30,11 +30,18 @@ function getUserID($pdo, $userApiKey){
     queryDB($pdo, $query, [$userApiKey]);
 }
 
-  $uri = $_SERVER["REQUEST_URI"];
-  $uri = parse_url($uri);
-  define('__BASE__', '/~damonfernandez/3430/cois-3430-2024su-a2-Blitzcranq/api/');
+function getEndPoint(){
+    $uri = $_SERVER["REQUEST_URI"];
+    $uri = parse_url($uri);
+    define('__BASE__', '/~damonfernandez/3430/cois-3430-2024su-a2-Blitzcranq/api/');
+    $endpoint = str_replace(__BASE__, "", $uri["path"]);
+    return $endpoint;
+}
+
+
+
+  $endpoint = getEndPoint();
   $requestMethod = $_SERVER['REQUEST_METHOD'];
-  $endpoint = str_replace(__BASE__, "", $uri["path"]);
   $pdo = connectdb();
 
   if(!str_contains($endpoint, "movies")){
