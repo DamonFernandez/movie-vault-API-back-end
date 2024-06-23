@@ -61,6 +61,20 @@ function queryDB($pdo, $query, $arrayOfValuesToPass){
     return $stmt;
 }
 
+function calcNewAvgRating($pdo, $id, $oldAvgRating, $oldRatingCount, $newRating, $oldRating = 0){
+    $query = "SELECT rating,  FROM completedWatchList WHERE watchListID = ?";
+    if(queryDB($pdo, $query, [$id]) != false){
+        $newAvgRating = (($oldAvgRating * $oldRatingCount) - $oldRating + $newRating) / $oldRatingCount + 1;
+        return $newAvgRating;
+    }
+    else{
+        $newAvgRating = (($oldAvgRating * $oldRatingCount) + $newRating) / $oldRatingCount + 1;
+        return $newAvgRating;
+    }
+
+}
+
+
   // GLOBAL CODE
   $endpoint = getEndPoint();
   $requestMethod = $_SERVER['REQUEST_METHOD'];
@@ -109,6 +123,17 @@ if($requestMethod == "GET" && $endpoint == "/completedwatchlist/entries/{id}/rat
     header("HTTP/1.1 200 OK");
     echo $result;
 
+}
+
+if($requestMethod == "POST" && $endpoint == "/completedwatchlist/entries"){
+    
+    $completedWatchListID = extractIDFromEndpoint($endpoint);
+    $query = "SELECT rating FROM completedWatchList WHERE completedWatchListID = ?";
+    $queryResultSetObject = queryDB($pdo, $query, [$completedWatchListID]);
+    $result = $queryResultSetObject -> fetch();
+    $result = json_encode($result);
+    header("HTTP/1.1 200 OK");
+    echo $result;
 }
 
 
