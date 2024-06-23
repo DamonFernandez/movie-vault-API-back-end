@@ -25,6 +25,11 @@ function getUserAPIKey($pdo){
     return $stmt -> execute();
   }
 
+function getUserID($pdo, $userApiKey){
+    $query = "SELECT user_id FROM users WHERE api_key = ?";
+    queryDB($pdo, $query, [$userApiKey]);
+}
+
   $uri = $_SERVER["REQUEST_URI"];
   $uri = parse_url($uri);
   define('__BASE__', '/~damonfernandez/3430/cois-3430-2024su-a2-Blitzcranq/api/');
@@ -34,11 +39,12 @@ function getUserAPIKey($pdo){
 
   if(!str_contains($endpoint, "movies")){
     $userApiKey = getUserAPIKey($pdo);
+    $user_id = getUserID($pdo, $userApiKey);
   }
 
 if($requestMethod == "GET" && $endpoint == "/completedwatchlist/entries"){
     $query = "SELECT * FROM completedWatchList WHERE userID = ?";
-
+    $queryResultSet = queryDB($pdo, $query, [$user_id]);
 }
 
   
