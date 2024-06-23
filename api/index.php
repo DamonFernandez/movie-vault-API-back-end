@@ -20,13 +20,26 @@ function getUserAPIKey($pdo){
   return $stmt["api_key"];
   }
 
-$uri = $_SERVER["REQUEST_URI"];
-$uri = parse_url($uri);
-define('__BASE__', '/~damonfernandez/3430/cois-3430-2024su-a2-Blitzcranq/api/');
-$requestMethod = $_SERVER['REQUEST_METHOD'];
-$endpoint = str_replace(__BASE__, "", $uri["path"]);
+  function queryDB($pdo, $query, $arrayOfValuesToPass){
+    $stmt = $pdo -> prepare($query);
+    return $stmt -> execute();
+  }
 
+  $uri = $_SERVER["REQUEST_URI"];
+  $uri = parse_url($uri);
+  define('__BASE__', '/~damonfernandez/3430/cois-3430-2024su-a2-Blitzcranq/api/');
+  $requestMethod = $_SERVER['REQUEST_METHOD'];
+  $endpoint = str_replace(__BASE__, "", $uri["path"]);
+  $pdo = connectdb();
 
-$pdo = connectdb();
+  if(!str_contains($endpoint, "movies")){
+    $userApiKey = getUserAPIKey($pdo);
+  }
 
+if($requestMethod == "GET" && $endpoint == "/completedwatchlist/entries"){
+    $query = "SELECT * FROM completedWatchList WHERE userID = ?";
+
+}
+
+  
 ?> 
