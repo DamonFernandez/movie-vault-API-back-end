@@ -194,7 +194,8 @@ else if($requestMethod == "POST" && $endpoint == "/completedwatchlist/entries"){
 }
 
 
-
+else if($requestMethod == "PATCH" && $endpoint == "/completedwatchlist/entries/{id}/times-watched"){
+}
 
 
 else{
