@@ -74,6 +74,49 @@ function calcNewAvgRating($pdo, $id, $oldAvgRating, $oldRatingCount, $newRating,
 
 }
 
+function validateSingleValForCompletedWatchListEntry($pdo, $thingToCheckFor){
+    
+
+    if(!isset($_POST[$thingToCheckFor])){
+        header("HTTP/1.1 400 Bad Request");
+        echo json_encode("Missing $thingToCheckFor");
+        exit();        
+    }
+
+    if($thingToCheckFor == "userID"){
+        $query = "SELECT userID FROM users WHERE userID = ?";
+        $queryResultSetObject = queryDB($pdo, $query, [$_POST["userID"]]);
+        if(!$queryResultSetObject -> fetch()){
+            header("HTTP/1.1 400 Bad Request");
+            echo json_encode("userID not found, check that you are accessing a valid userID");
+            exit();        
+        }
+    }
+    else if($thingToCheckFor == "movieID"){
+        $query = "SELECT movieID FROM movies WHERE movieID = ?";
+        $queryResultSetObject = queryDB($pdo, $query, [$_POST["movieID"]]);
+        if(!$queryResultSetObject -> fetch()){
+            header("HTTP/1.1 400 Bad Request");
+            echo json_encode("movieID not found, check that you are accessing a valid movieID");
+            exit();        
+        }
+
+
+
+    }
+}
+
+
+function validateWholeCompletedWatchListEntry($pdo){
+    validateSingleValForCompletedWatchListEntry($pdo, "userID");
+    validateSingleValForCompletedWatchListEntry($pdo, "movieID");
+    validateSingleValForCompletedWatchListEntry($pdo, "rating");
+    validateSingleValForCompletedWatchListEntry($pdo, "notes");
+    validateSingleValForCompletedWatchListEntry($pdo, "dateStarted");
+    validateSingleValForCompletedWatchListEntry($pdo, "dateCompleted");
+    validateSingleValForCompletedWatchListEntry($pdo, "numOfTimesWatched");
+}
+
 
   // GLOBAL CODE
   $endpoint = getEndPoint();
@@ -126,55 +169,7 @@ if($requestMethod == "GET" && $endpoint == "/completedwatchlist/entries/{id}/rat
     exit();
 }
 
-function validateSingleValForCompletedWatchListEntry($pdo, $thingToCheckFor){
-    
 
-    if(!isset($_POST[$thingToCheckFor])){
-        header("HTTP/1.1 400 Bad Request");
-        echo json_encode("Missing $thingToCheckFor");
-        exit();        
-    }
-
-    if($thingToCheckFor == "userID"){
-        $query = "SELECT userID FROM users WHERE userID = ?";
-        $queryResultSetObject = queryDB($pdo, $query, [$_POST["userID"]]);
-        if(!$queryResultSetObject -> fetch()){
-            header("HTTP/1.1 400 Bad Request");
-            echo json_encode("userID not found, check that you are accessing a valid userID");
-            exit();        
-        }
-    }
-    else if($thingToCheckFor == "movieID"){
-        $query = "SELECT movieID FROM movies WHERE movieID = ?";
-        $queryResultSetObject = queryDB($pdo, $query, [$_POST["movieID"]]);
-        if(!$queryResultSetObject -> fetch()){
-            header("HTTP/1.1 400 Bad Request");
-            echo json_encode("movieID not found, check that you are accessing a valid movieID");
-            exit();        
-        }
-
-
-
-    }
-
-    $query = "SELECT api_key FROM users WHERE api_key = ?";
-    $stmt = $pdo -> prepare($query);
-    $stmt -> execute([$key]);
-    if(!$stmt->fetch()){
-      $continueFlag = false;
-    }
-  }
-}
-
-function validateWholeCompletedWatchListEntry($pdo){
-    validateSingleValForCompletedWatchListEntry($pdo, "userID");
-    validateSingleValForCompletedWatchListEntry($pdo, "movieID");
-    validateSingleValForCompletedWatchListEntry($pdo, "rating");
-    validateSingleValForCompletedWatchListEntry($pdo, "notes");
-    validateSingleValForCompletedWatchListEntry($pdo, "dateStarted");
-    validateSingleValForCompletedWatchListEntry($pdo, "dateCompleted");
-    validateSingleValForCompletedWatchListEntry($pdo, "numOfTimesWatched");
-}
 
 if($requestMethod == "POST" && $endpoint == "/completedwatchlist/entries"){
 
@@ -191,9 +186,11 @@ if($requestMethod == "POST" && $endpoint == "/completedwatchlist/entries"){
         $_POST["numOfTimesWatched"]
     ]);
 
-
     header("HTTP/1.1 200 OK");
     echo json_encode(['message' => 'insertion of new row successful']);
+
+    // STILL NEED TO RECOMPUTE MOVIE AVG RATING, WITH THE NEW RATING THAT WAS ADDED 
+
 }
 
 
