@@ -83,7 +83,7 @@ function calcNewAvgRating($pdo, $id, $oldAvgRating, $oldRatingCount, $newRating,
 
   // All endpoints that dont involve the movies table require an API key
   // So get it if the endpoint does not contain "movies" in its name
-  if(!str_contains($endpoint, "movies")){
+  if(!str_contains($endpoint, "movies") && !str_contains($endpoint, "users")){
     // Exists if valid api key is not found, preventing non auth users
     // from doing any non-allowed requests
     $userApiKey = getUserAPIKey($pdo);
@@ -126,15 +126,17 @@ if($requestMethod == "GET" && $endpoint == "/completedwatchlist/entries/{id}/rat
 }
 
 if($requestMethod == "POST" && $endpoint == "/completedwatchlist/entries"){
-    
-    $completedWatchListID = extractIDFromEndpoint($endpoint);
-    $query = "SELECT rating FROM completedWatchList WHERE completedWatchListID = ?";
+
+    $query = "INSERT INTO completedWatchList (watchListID, userID, movieID, rating, notes, dateStarted, dateCompleted) VALUES (, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+
     $queryResultSetObject = queryDB($pdo, $query, [$completedWatchListID]);
     $result = $queryResultSetObject -> fetch();
     $result = json_encode($result);
     header("HTTP/1.1 200 OK");
     echo $result;
 }
+
 
 
   
