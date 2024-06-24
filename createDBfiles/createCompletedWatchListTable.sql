@@ -1,6 +1,5 @@
 CREATE TABLE IF NOT EXISTS `completedWatchList` (
     `completedWatchListID` int(11) NOT NULL AUTO_INCREMENT,
-    `watchListID` int(11) NOT NULL,
     `userID` int(11) NOT NULL,
     `movieID` int(11) NOT NULL,
     `rating` int(11) NOT NULL,

@@ -127,7 +127,8 @@ if($requestMethod == "GET" && $endpoint == "/completedwatchlist/entries/{id}/rat
 
 if($requestMethod == "POST" && $endpoint == "/completedwatchlist/entries"){
 
-    $query = "INSERT INTO completedWatchList (watchListID, userID, movieID, rating, notes, dateStarted, dateCompleted) VALUES (, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    $query = "INSERT INTO completedWatchList (userID, movieID, rating, notes, dateStarted, dateCompleted) VALUES (?, ?, ?, ?, ?, ?)";
+
 
 
     $queryResultSetObject = queryDB($pdo, $query, [$completedWatchListID]);
