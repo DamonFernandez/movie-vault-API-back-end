@@ -7,7 +7,5 @@ CREATE TABLE IF NOT EXISTS `toWatchList` (
     PRIMARY KEY (`toWatchListID`),
     FOREIGN KEY (`userID`) REFERENCES `users` (`userID`),
     FOREIGN KEY (`movieID`) REFERENCES `movies` (`movieID`)
-
-
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

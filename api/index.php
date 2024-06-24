@@ -99,6 +99,7 @@ if($requestMethod == "GET" && $endpoint == "/completedwatchlist/entries"){
     header("Content-Type: application/json; charset=UTF-8"); 
     header("HTTP/1.1 200 OK");
     echo $completedWatchList;
+    exit();
 }
 
 if($requestMethod == "GET" && $endpoint == "/completedwatchlist/entries/{id}/times-watched"){
@@ -110,7 +111,7 @@ if($requestMethod == "GET" && $endpoint == "/completedwatchlist/entries/{id}/tim
     header("Content-Type: application/json; charset=UTF-8"); 
     header("HTTP/1.1 200 OK");
     echo $result;
-
+    exit();
 }
 
 if($requestMethod == "GET" && $endpoint == "/completedwatchlist/entries/{id}/rating"){
@@ -122,20 +123,77 @@ if($requestMethod == "GET" && $endpoint == "/completedwatchlist/entries/{id}/rat
     header("Content-Type: application/json; charset=UTF-8"); 
     header("HTTP/1.1 200 OK");
     echo $result;
+    exit();
+}
 
+function validateSingleValForCompletedWatchListEntry($pdo, $thingToCheckFor){
+    
+
+    if(!isset($_POST[$thingToCheckFor])){
+        header("HTTP/1.1 400 Bad Request");
+        echo json_encode("Missing $thingToCheckFor");
+        exit();        
+    }
+
+    if($thingToCheckFor == "userID"){
+        $query = "SELECT userID FROM users WHERE userID = ?";
+        $queryResultSetObject = queryDB($pdo, $query, [$_POST["userID"]]);
+        if(!$queryResultSetObject -> fetch()){
+            header("HTTP/1.1 400 Bad Request");
+            echo json_encode("userID not found, check that you are accessing a valid userID");
+            exit();        
+        }
+    }
+    else if($thingToCheckFor == "movieID"){
+        $query = "SELECT movieID FROM movies WHERE movieID = ?";
+        $queryResultSetObject = queryDB($pdo, $query, [$_POST["movieID"]]);
+        if(!$queryResultSetObject -> fetch()){
+            header("HTTP/1.1 400 Bad Request");
+            echo json_encode("movieID not found, check that you are accessing a valid movieID");
+            exit();        
+        }
+
+
+
+    }
+
+    $query = "SELECT api_key FROM users WHERE api_key = ?";
+    $stmt = $pdo -> prepare($query);
+    $stmt -> execute([$key]);
+    if(!$stmt->fetch()){
+      $continueFlag = false;
+    }
+  }
+}
+
+function validateWholeCompletedWatchListEntry($pdo){
+    validateSingleValForCompletedWatchListEntry($pdo, "userID");
+    validateSingleValForCompletedWatchListEntry($pdo, "movieID");
+    validateSingleValForCompletedWatchListEntry($pdo, "rating");
+    validateSingleValForCompletedWatchListEntry($pdo, "notes");
+    validateSingleValForCompletedWatchListEntry($pdo, "dateStarted");
+    validateSingleValForCompletedWatchListEntry($pdo, "dateCompleted");
+    validateSingleValForCompletedWatchListEntry($pdo, "numOfTimesWatched");
 }
 
 if($requestMethod == "POST" && $endpoint == "/completedwatchlist/entries"){
 
-    $query = "INSERT INTO completedWatchList (userID, movieID, rating, notes, dateStarted, dateCompleted) VALUES (?, ?, ?, ?, ?, ?)";
+    validateWholeCompletedWatchListEntry($pdo);
+
+    $query = "INSERT INTO completedWatchList (userID, movieID, rating, notes, dateStarted, dateCompleted, numOfTimesWatched) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    queryDB($pdo, $query, [
+        $_POST["userID"],
+        $_POST["movieID"],
+        $_POST["rating"],
+        $_POST["notes"],
+        $_POST["dateStarted"],
+        $_POST["dateCompleted"],
+        $_POST["numOfTimesWatched"]
+    ]);
 
 
-
-    $queryResultSetObject = queryDB($pdo, $query, [$completedWatchListID]);
-    $result = $queryResultSetObject -> fetch();
-    $result = json_encode($result);
     header("HTTP/1.1 200 OK");
-    echo $result;
+    echo json_encode(['message' => 'insertion of new row successful']);
 }
 
 
