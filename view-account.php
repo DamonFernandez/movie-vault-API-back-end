@@ -9,10 +9,10 @@ $pdo = connectdb();
 
 function queryForUserDetails($pdo)
 {
-    $user_id = $_SESSION["user_id"];
-    $query = "SELECT * FROM users WHERE user_id = ?";
+    $userID = $_SESSION["userID"];
+    $query = "SELECT * FROM users WHERE userID = ?";
     $stmt = $pdo->prepare($query);
-    $stmt->execute([$user_id]);
+    $stmt->execute([$userID]);
 
     return $stmt->fetch();
 }
@@ -21,10 +21,10 @@ function issueNewAPIKey($pdo)
 {
 
     $key = genAPIKey($pdo);
-    $user_id = $_SESSION["user_id"];
-    $query = "UPDATE users SET api_key = ?, api_date = NOW()  WHERE user_id = ?";
+    $userID = $_SESSION["userID"];
+    $query = "UPDATE users SET api_key = ?, api_date = NOW()  WHERE userID = ?";
     $stmt = $pdo->prepare($query);
-    $stmt->execute([$key, $user_id]);
+    $stmt->execute([$key, $userID]);
 
     // Redirect to the same page to clear POST data and avoid resubmission on reload
     header("Location: " . $_SERVER['REQUEST_URI']);

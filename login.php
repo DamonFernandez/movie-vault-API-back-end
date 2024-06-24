@@ -19,7 +19,7 @@ if (isset($_POST['submit'])) {
         if (password_verify($password, $dbrow['password'])) {
             session_start();
             $_SESSION['username'] = $username;
-            $_SESSION['user_id'] = $dbrow['user_id'];
+            $_SESSION['userID'] = $dbrow['userID']; //fixed for the correct column name
             header("Location: view-account.php");
             exit();
         } else {
