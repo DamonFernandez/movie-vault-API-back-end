@@ -1,0 +1,21 @@
+header {
+    background-color: var(--border-color);
+    padding: 0.5em 0;
+}
+
+header nav form {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1em;
+
+}
+
+header button {
+    background-color: var(--primary-color);
+    color: var(--secondary-color);
+    border: none;
+    padding: 0.5em 1em;
+    border-radius: 0.25em;
+    cursor: pointer;
+}

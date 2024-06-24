@@ -44,10 +44,6 @@ if (isset($_POST["apiRequestButton"])) {
 }
 
 checkForLogOut();
-
-
-
-
 ?>
 
 <!DOCTYPE html>
@@ -61,6 +57,7 @@ checkForLogOut();
 </head>
 
 <body>
+    <?php include_once './includes/header.php' ?>
     <ul>
         <li>Username: <?= $tableRow["username"] ?> </li>
         <li>Email: <?= $tableRow["email"] ?></li>

@@ -16,10 +16,11 @@ checkToRedirectToLoginPage() ?>
 </head>
 
 <body>
-
-    <header>
-        <h1>API Documentation Page</h1>
-    </header>
+    <?php include_once './includes/header.php';
+    createLogOutButton();
+    checkForLogOut();
+    ?>
+    <h1>API Documentation Page</h1>
     <main>
         <section>
             <h2>Movies Table Endpoints</h2>
