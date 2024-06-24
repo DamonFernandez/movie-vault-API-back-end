@@ -145,7 +145,7 @@ if($requestMethod == "GET" && $endpoint == "/completedwatchlist/entries"){
     exit();
 }
 
-if($requestMethod == "GET" && $endpoint == "/completedwatchlist/entries/{id}/times-watched"){
+else if($requestMethod == "GET" && $endpoint == "/completedwatchlist/entries/{id}/times-watched"){
     $completedWatchListID = extractIDFromEndpoint($endpoint);
     $query = "SELECT numOfTimesWatched FROM completedWatchList WHERE completedWatchListID = ?";
     $queryResultSetObject = queryDB($pdo, $query, [$completedWatchListID]);
@@ -157,7 +157,7 @@ if($requestMethod == "GET" && $endpoint == "/completedwatchlist/entries/{id}/tim
     exit();
 }
 
-if($requestMethod == "GET" && $endpoint == "/completedwatchlist/entries/{id}/rating"){
+else if($requestMethod == "GET" && $endpoint == "/completedwatchlist/entries/{id}/rating"){
     $completedWatchListID = extractIDFromEndpoint($endpoint);
     $query = "SELECT rating FROM completedWatchList WHERE completedWatchListID = ?";
     $queryResultSetObject = queryDB($pdo, $query, [$completedWatchListID]);
@@ -171,7 +171,7 @@ if($requestMethod == "GET" && $endpoint == "/completedwatchlist/entries/{id}/rat
 
 
 
-if($requestMethod == "POST" && $endpoint == "/completedwatchlist/entries"){
+else if($requestMethod == "POST" && $endpoint == "/completedwatchlist/entries"){
 
     validateWholeCompletedWatchListEntry($pdo);
 
@@ -194,6 +194,14 @@ if($requestMethod == "POST" && $endpoint == "/completedwatchlist/entries"){
 }
 
 
+
+
+
+else{
+    header("HTTP/1.1 400 Bad Request");
+    echo json_encode("Your request was not a valid endpoint and/or it involved an invalid paring of an route and a request method");
+    exit();
+}
 
   
 ?> 
