@@ -32,7 +32,9 @@ if (isset($_POST['submit'])) {
     }
     if (empty($errors)) {
         $hash = password_hash($password1, PASSWORD_DEFAULT);
-        $userapikey = bin2hex(random_bytes(32));
+        $userapikey = genAPIKey($pdo);
+
+        //chnage this, readability : 0
         $stmt = $pdo->prepare('INSERT INTO users (`username`,`email`,`password`,`api_key`,`api_date`) VALUES (?,?,?,?,NOW())')->execute([$username, $email, $hash, $userapikey]);
         header("Location: login.php");
         exit();
