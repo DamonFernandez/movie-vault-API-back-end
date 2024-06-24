@@ -4,6 +4,8 @@ function getEndPoint(){
     $uri = $_SERVER["REQUEST_URI"];
     $uri = parse_url($uri);
     define('__BASE__', '/~damonfernandez/3430/cois-3430-2024su-a2-Blitzcranq/api/');
+
+    // define('__BASE__', '/~damonfernandez/3430/cois-3430-2024su-a2-Blitzcranq/api/');
     $endpoint = str_replace(__BASE__, "", $uri["path"]);
     return $endpoint;
 }
@@ -40,6 +42,8 @@ function getUserID($pdo, $userApiKey){
     return $result["user_id"];
 }
 
+
+// Extract ID normally
 function extractIDFromEndpoint($endpoint) {
     $explodedEndpoint = explode("/", $endpoint);
     foreach ($explodedEndpoint as $string) {
@@ -115,6 +119,10 @@ function validateWholeCompletedWatchListEntry($pdo){
     validateSingleValForCompletedWatchListEntry($pdo, "dateStarted");
     validateSingleValForCompletedWatchListEntry($pdo, "dateCompleted");
     validateSingleValForCompletedWatchListEntry($pdo, "numOfTimesWatched");
+}
+
+function setResponse(){
+
 }
 
 
@@ -195,6 +203,9 @@ else if($requestMethod == "POST" && $endpoint == "/completedwatchlist/entries"){
 
 
 else if($requestMethod == "PATCH" && $endpoint == "/completedwatchlist/entries/{id}/times-watched"){
+    $completedWatchListID = $endpoint;
+    $query = "UPDATE completedWatchList SET numOfTimesWatched = numOfTimesWatched + 1, dateLastWatch = NOW() WHERE completedWatchListID = ?";
+    queryDB($pdo, $query, [$completedWatchListID]);
 }
 
 

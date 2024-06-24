@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS `completedWatchList` (
     `rating` int(11) NOT NULL,
     `notes` text NOT NULL,
     `dateStarted` date NOT NULL,
-    `dateCompleted` date NOT NULL,
+    `dateLastWatched` date NOT NULL,
     `numOfTimesWatched` int(11) NOT NULL,
     PRIMARY KEY (`completedWatchListID`),
     FOREIGN KEY (`userID`) REFERENCES `users` (`userID`),
