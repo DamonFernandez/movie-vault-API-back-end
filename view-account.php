@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 require_once "./includes/library.php";
 
@@ -7,41 +7,39 @@ checkToRedirectToLoginPage();
 $pdo = connectdb();
 
 
-function queryForUserDetails($pdo){
+function queryForUserDetails($pdo)
+{
     $user_id = $_SESSION["user_id"];
     $query = "SELECT * FROM users WHERE user_id = ?";
-    $stmt = $pdo -> prepare($query);
-    $stmt -> execute([$user_id]);
+    $stmt = $pdo->prepare($query);
+    $stmt->execute([$user_id]);
 
-    return $stmt ->fetch();  
+    return $stmt->fetch();
 }
 
-function issueNewAPIKey($pdo){
-    
+function issueNewAPIKey($pdo)
+{
+
     $key = genAPIKey($pdo);
     $user_id = $_SESSION["user_id"];
     $query = "UPDATE users SET api_key = ?, api_date = NOW()  WHERE user_id = ?";
-    $stmt = $pdo -> prepare($query);
-    $stmt -> execute([$key, $user_id]);
+    $stmt = $pdo->prepare($query);
+    $stmt->execute([$key, $user_id]);
 
     // Redirect to the same page to clear POST data and avoid resubmission on reload
     header("Location: " . $_SERVER['REQUEST_URI']);
     exit();
-
-
-
-
 }
 
 $tableRow = queryForUserDetails($pdo);
 
 
-if(!$tableRow){
+if (!$tableRow) {
     echo "User not found";
     exit();
 }
 
-if(isset($_POST["apiRequestButton"])){
+if (isset($_POST["apiRequestButton"])) {
     $message = issueNewAPIKey($pdo);
 }
 
@@ -54,28 +52,31 @@ checkForLogOut();
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
 </head>
+
 <body>
     <ul>
-        <li>Username: <?= $tableRow["username"]?> </li>
-        <li>Email: <?= $tableRow["email"]?></li>
-        <li>API Key: <?= $tableRow["api_key"]?></li>
-        <li>Date API key was issued: <?= $tableRow["api_date"]?></li>
+        <li>Username: <?= $tableRow["username"] ?> </li>
+        <li>Email: <?= $tableRow["email"] ?></li>
+        <li>API Key: <?= $tableRow["api_key"] ?></li>
+        <li>Date API key was issued: <?= $tableRow["api_date"] ?></li>
     </ul>
 
     <form method="POST">
         <button type="submit" name="apiRequestButton">Request new API key</button>
     </form>
 
-    
 
-    <p> <? $message ?> 
+
+    <p> <? $message ?>
     </p>
 
     <?= createLogOutButton() ?>
 </body>
+
 </html>
