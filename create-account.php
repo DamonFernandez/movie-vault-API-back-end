@@ -23,6 +23,12 @@ if (isset($_POST['submit'])) {
     //verify email is valid
     if (empty(filter_var($email, FILTER_VALIDATE_EMAIL))) {
         $errors['email'] = true;
+    } else {
+        $stmt = $pdo->prepare(('SELECT 1 FROM users WHERE email=?'));
+        $stmt->execute([$email]);
+        if ($stmt->fetch()) {
+            $errors['email_duplicate'] = true;
+        }
     }
     if ($password1 === $password2) {
         if (strlen($password1) < 7)
@@ -62,36 +68,38 @@ if (isset($_POST['submit'])) {
         <h1>My Movie List</h1>
     </header>
     <main>
-        <div>
+        <div class="loginbox">
             <h2>Create Account</h2>
-            <form id="create-account" method="post" action="" />
+            <form id="create-account" method="post" class="forms" />
             <div>
                 <label for="username">Username:</label>
                 <input type="text" id="username" name="username" size="25" value="<?= $username ?>" />
-                <span class="error <?= !isset($errors['username_empty']) ? 'hidden' : '' ?>">Your username cannot be empty</span>
-                <span class="error <?= !isset($errors['username_duplicate']) ? 'hidden' : '' ?>">Username already exists</span>
+                <div class="error <?= !isset($errors['username_empty']) ? 'hidden' : '' ?>">Your username cannot be empty</>
+                </div>
             </div>
+            <span class="error <?= !isset($errors['username_duplicate']) ? 'hidden' : '' ?>">Username already exists</span>
+
             <div>
                 <label for="email">Email:</label>
 
                 <input type="text" id="email" name="email" size="25" value="<?= $email ?>" />
-                <span class="error <?= !isset($errors['email']) ? 'hidden' : '' ?>">Your email was invalid</span>
-            </div>
-            <div>
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password" size="25" />
-                <span class="error <?= !isset($errors['p_strength']) ? 'hidden' : '' ?>">Your password is not strong
-                    enough</span>
-            </div>
-            <div>
-                <label for="password2">Verify Password:</label>
-                <input type="password" id="password2" name="password2" size="25" />
-                <span class="error <?= !isset($errors['p_match']) ? 'hidden' : '' ?>">Your passwords do not match</span>
-            </div>
-            <button id="submit" name="submit">Create Account</button>
-            </form>
+                <div class="error <?= !isset($errors['email']) ? 'hidden' : '' ?>"> Your email was invalid</div>
+                <div class="error <?= !isset($errors['email_duplicate']) ? 'hidden' : '' ?>">Email already exists</div>
+                <div>
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" size="25" />
+                    <div class="error <?= !isset($errors['p_strength']) ? 'hidden' : '' ?>">Your password is not strong
+                        enough</div>
+                </div>
+                <div>
+                    <label for="password2">Verify Password:</label>
+                    <input type="password" id="password2" name="password2" size="25" />
+                    <div class="error <?= !isset($errors['p_match']) ? 'hidden' : '' ?>">Your passwords do not match</div>
+                </div>
+                <button id="submit" name="submit">Create Account</button>
+                </form>
 
-        </div>
+            </div>
     </main>
 </body>
 

@@ -49,18 +49,19 @@ if (isset($_POST['submit'])) {
     </header>
     <main>
 
-        <div>
+        <div class="loginbox">
             <h2>Login</h2>
-            <form id="login" method="post" action="" />
+            <form id="login" method="post" action="" class="forms" />
+
             <div>
                 <label for="username">Username:</label>
                 <!--notice the echo of username to allow for a sticky form on error-->
-                <input type="text" id="username" name="username" size="25" value="<?php echo $username ?>" />
+                <input type="text" id="username" name="username" size="25" value="<?php echo $username ?>">
                 <span class="error <?= !isset($errors['username']) ? 'hidden' : '' ?>">Your username was invalid</span>
             </div>
             <div>
                 <label for="password">Password:</label>
-                <input type="password" id="password" name="password" size="25" />
+                <input type="password" id="password" name="password" size="25">
                 <span class="error <?= !isset($errors['password']) ? 'hidden' : '' ?>">Your password was invalid</span>
             </div>
 
@@ -69,8 +70,8 @@ if (isset($_POST['submit'])) {
                 <input type="checkbox" name="remember" value="remember" />
             </div>
 
-            <button id="submit" name="submit" class="centered">Login</button>
-            <a href="create-account.php" class="centered">Create a New Account</a>
+            <button id="submit" name="submit">Login</button>
+            <a href="create-account.php">Create a New Account?</a>
             </form>
 
         </div>

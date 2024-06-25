@@ -58,23 +58,23 @@ checkForLogOut();
 
 <body>
     <?php include_once './includes/header.php' ?>
-    <ul>
-        <li>Username: <?= $tableRow["username"] ?> </li>
-        <li>Email: <?= $tableRow["email"] ?></li>
-        <li>API Key: <?= $tableRow["api_key"] ?></li>
-        <li>Date API key was issued: <?= $tableRow["api_date"] ?></li>
-    </ul>
+    <div class="userinfo">
+        <h2>User Info</h2>
+        <ul>
+            <li>Username: <span class="value"><?= $tableRow["username"] ?></span> </li>
+            <li>Email:<span class="value"> <?= $tableRow["email"] ?></span></li>
+            <li>API Key:<span class="value"> <?= $tableRow["api_key"] ?></span></li>
+            <li>Date API key was issued: <span class="value"><?= $tableRow["api_date"] ?></span></li>
+        </ul>
+    </div>
 
-    <form method="POST">
+    <form method="POST" class="view-form">
         <button type="submit" name="apiRequestButton">Request new API key</button>
+        <p> <? $message ?>
+        </p>
+        <?= createLogOutButton() ?>
     </form>
 
-
-
-    <p> <? $message ?>
-    </p>
-
-    <?= createLogOutButton() ?>
 </body>
 
 </html>

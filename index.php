@@ -22,7 +22,7 @@ checkToRedirectToLoginPage() ?>
     ?>
     <h1>API Documentation Page</h1>
     <main>
-        <section>
+        <section class="loginbox">
             <h2>Movies Table Endpoints</h2>
             <ul>
                 <li>GET & /movies/ - should return all movies.</li>
@@ -30,7 +30,7 @@ checkToRedirectToLoginPage() ?>
                 <li>GET & /movies/{id}/rating - returns the rating value for a specific movie.</li>
             </ul>
         </section>
-        <section>
+        <section class="loginbox">
             <h2>toWatchList Table Endpoints</h2>
             <ul>
                 <li>GET & /towatchlist/entries - requires an api key and returns all entries on the user's toWatchList.</li>
@@ -40,7 +40,7 @@ checkToRedirectToLoginPage() ?>
                 <li>DELETE & /towatchlist/entries/{id} - requires an api key and movieID and deletes the appropriate movie from the user's watchlist.</li>
             </ul>
         </section>
-        <section>
+        <section class="loginbox">
             <h2>completedWatchList Table Endpoints</h2>
             <ul>
                 <li>GET & /completedwatchlist/entries - requires an api key and returns all entries on the user's completedWatchList.</li>
@@ -52,7 +52,7 @@ checkToRedirectToLoginPage() ?>
                 <li>DELETE & /completedwatchlist/entries/{id} - requires an api key and movieID and deletes the appropriate movie from the completedWatchList.</li>
             </ul>
         </section>
-        <section>
+        <section class="loginbox">
             <h2>user Table Endpoints</h2>
             <ul>
                 <li>GET & /users/{id}/stats - returns basic watching stats for the provided user.</li>
