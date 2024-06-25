@@ -148,49 +148,72 @@ if (!str_contains($endpoint, "movies") && !str_contains($endpoint, "users")) {
     $user_id = getUserID($pdo, $userApiKey);
 }
 
-if ($requestMethod == "GET" && $endpoint == "/completedwatchlist/entries") {
-    $query = "SELECT * FROM completedWatchList WHERE userID = ?";
-    $queryResultSetObject = queryDB($pdo, $query, [$user_id]);
-    $completedWatchList = $queryResultSetObject->fetchAll();
-    sendResponse($completedWatchList, "200 OK");
-} else if ($requestMethod == "GET" && $endpoint == "/completedwatchlist/entries/{id}/times-watched") {
-    $completedWatchListID = extractIDFromEndpoint($endpoint);
-    $query = "SELECT numOfTimesWatched FROM completedWatchList WHERE completedWatchListID = ?";
-    $queryResultSetObject = queryDB($pdo, $query, [$completedWatchListID]);
-    $result = $queryResultSetObject->fetch();
-    sendResponse($result, "200 OK");
-} else if ($requestMethod == "GET" && $endpoint == "/completedwatchlist/entries/{id}/rating") {
-    $completedWatchListID = extractIDFromEndpoint($endpoint);
-    $query = "SELECT rating FROM completedWatchList WHERE completedWatchListID = ?";
-    $queryResultSetObject = queryDB($pdo, $query, [$completedWatchListID]);
-    $result = $queryResultSetObject->fetch();
-    sendResponse($result, "200 OK");
-} else if ($requestMethod == "POST" && $endpoint == "/completedwatchlist/entries") {
-
-    validateWholeCompletedWatchListEntry($pdo);
-
-    $query = "INSERT INTO completedWatchList (userID, movieID, rating, notes, dateStarted, dateCompleted, numOfTimesWatched) VALUES (?, ?, ?, ?, ?, ?, ?)";
-    queryDB($pdo, $query, [
-        $_POST["userID"],
-        $_POST["movieID"],
-        $_POST["rating"],
-        $_POST["notes"],
-        $_POST["dateStarted"],
-        $_POST["dateCompleted"],
-        $_POST["numOfTimesWatched"]
-    ]);
-
-    header("HTTP/1.1 200 OK");
-    echo json_encode(['message' => 'insertion of new row successful']);
-
-    // STILL NEED TO RECOMPUTE MOVIE AVG RATING, WITH THE NEW RATING THAT WAS ADDED 
-
-} else if ($requestMethod == "PATCH" && $endpoint == "/completedwatchlist/entries/{id}/times-watched") {
-    $completedWatchListID = $endpoint;
-    $query = "UPDATE completedWatchList SET numOfTimesWatched = numOfTimesWatched + 1, dateLastWatch = NOW() WHERE completedWatchListID = ?";
-    queryDB($pdo, $query, [$completedWatchListID]);
-} else {
-    header("HTTP/1.1 400 Bad Request");
-    echo json_encode("Your request was not a valid endpoint and/or it involved an invalid paring of an route and a request method");
-    exit();
+switch ($requestMethod) {
+    case "GET":
+        switch ($endpoint) {
+            case "/completedwatchlist/entries":
+                $query = "SELECT * FROM completedWatchList WHERE userID = ?";
+                $queryResultSetObject = queryDB($pdo, $query, [$user_id]);
+                $completedWatchList = $queryResultSetObject->fetchAll();
+                sendResponse($completedWatchList, "200 OK");
+                break;
+            case "/completedwatchlist/entries/{id}/times-watched":
+                $completedWatchListID = extractIDFromEndpoint($endpoint);
+                $query = "SELECT numOfTimesWatched FROM completedWatchList WHERE completedWatchListID = ?";
+                $queryResultSetObject = queryDB($pdo, $query, [$completedWatchListID]);
+                $result = $queryResultSetObject->fetch();
+                sendResponse($result, "200 OK");
+                break;
+            case "/completedwatchlist/entries/{id}/rating":
+                $completedWatchListID = extractIDFromEndpoint($endpoint);
+                $query = "SELECT rating FROM completedWatchList WHERE completedWatchListID = ?";
+                $queryResultSetObject = queryDB($pdo, $query, [$completedWatchListID]);
+                $result = $queryResultSetObject->fetch();
+                sendResponse($result, "200 OK");
+                break;
+            case "/movies/{id}/rating":
+                $movieID = extractIDFromEndpoint($endpoint);
+                $query = "SELECT rating FROM completedWatchList WHERE movieID = ?";
+                $queryResultSetObject = queryDB($pdo, $query, [$movieID]);
+                $result = $queryResultSetObject->fetch();
+                sendResponse($result, "200 OK");
+                break;
+            default:
+                sendResponse("Your request was not a valid endpoint", "400 Bad Request");
+        }
+        break;
+    case "POST":
+        switch ($endpoint) {
+            case "/completedwatchlist/entries":
+                validateWholeCompletedWatchListEntry($pdo);
+                $query = "INSERT INTO completedWatchList (userID, movieID, rating, notes, dateStarted, dateCompleted, numOfTimesWatched) VALUES (?, ?, ?, ?, ?, ?, ?)";
+                queryDB($pdo, $query, [
+                    $_POST["userID"],
+                    $_POST["movieID"],
+                    $_POST["rating"],
+                    $_POST["notes"],
+                    $_POST["dateStarted"],
+                    $_POST["dateCompleted"],
+                    $_POST["numOfTimesWatched"]
+                ]);
+                sendResponse("Completed watchlist entry added", "201 Created");
+                // STILL NEED TO RECOMPUTE MOVIE AVG RATING, WITH THE NEW RATING THAT WAS ADDED 
+                break;
+            default:
+                sendResponse("Your request was not a valid endpoint", "400 Bad Request");
+        }
+        break;
+    case "PATCH":
+        switch ($endpoint) {
+            case "/completedwatchlist/entries/{id}/times-watched":
+                $completedWatchListID = $endpoint;
+                $query = "UPDATE completedWatchList SET numOfTimesWatched = numOfTimesWatched + 1, dateLastWatch = NOW() WHERE completedWatchListID = ?";
+                queryDB($pdo, $query, [$completedWatchListID]);
+                break;
+            default:
+                sendResponse("Your request was not a valid endpoint", "400 Bad Request");
+        }
+        break;
+    default:
+        sendResponse("Your request was not a valid endpoint", "400 Bad Request");
 }
