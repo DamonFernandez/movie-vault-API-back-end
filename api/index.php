@@ -11,11 +11,11 @@ function getEndPoint()
     return $endpoint;
 }
 
-function sendResponse($json_data, $responseCode)
+function sendResponse($data, $responseCode)
 {
     header("HTTP/1.1 " . $responseCode);
     header("Content-Type: application/json; charset=UTF-8");
-    $json_data = json_encode($json_data);
+    $json_data = json_encode($data);
     echo $json_data;
     exit();
 }
@@ -152,32 +152,19 @@ if ($requestMethod == "GET" && $endpoint == "/completedwatchlist/entries") {
     $query = "SELECT * FROM completedWatchList WHERE userID = ?";
     $queryResultSetObject = queryDB($pdo, $query, [$user_id]);
     $completedWatchList = $queryResultSetObject->fetchAll();
-    $completedWatchList = json_encode($completedWatchList);
-
-    header("Content-Type: application/json; charset=UTF-8");
-    header("HTTP/1.1 200 OK");
-    echo $completedWatchList;
-    exit();
+    sendResponse($completedWatchList, "200 OK");
 } else if ($requestMethod == "GET" && $endpoint == "/completedwatchlist/entries/{id}/times-watched") {
     $completedWatchListID = extractIDFromEndpoint($endpoint);
     $query = "SELECT numOfTimesWatched FROM completedWatchList WHERE completedWatchListID = ?";
     $queryResultSetObject = queryDB($pdo, $query, [$completedWatchListID]);
     $result = $queryResultSetObject->fetch();
-    $result = json_encode($result);
-    header("Content-Type: application/json; charset=UTF-8");
-    header("HTTP/1.1 200 OK");
-    echo $result;
-    exit();
+    sendResponse($result, "200 OK");
 } else if ($requestMethod == "GET" && $endpoint == "/completedwatchlist/entries/{id}/rating") {
     $completedWatchListID = extractIDFromEndpoint($endpoint);
     $query = "SELECT rating FROM completedWatchList WHERE completedWatchListID = ?";
     $queryResultSetObject = queryDB($pdo, $query, [$completedWatchListID]);
     $result = $queryResultSetObject->fetch();
-    $result = json_encode($result);
-    header("Content-Type: application/json; charset=UTF-8");
-    header("HTTP/1.1 200 OK");
-    echo $result;
-    exit();
+    sendResponse($result, "200 OK");
 } else if ($requestMethod == "POST" && $endpoint == "/completedwatchlist/entries") {
 
     validateWholeCompletedWatchListEntry($pdo);
