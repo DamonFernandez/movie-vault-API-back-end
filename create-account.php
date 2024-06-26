@@ -14,9 +14,9 @@ function validateField($field, $value, $errormsg)
 {
     global $errors;
     $pdo = connectdb();
-    $stmt = $pdo->prepare(('SELECT 1 FROM users WHERE ?=?'));
+    $stmt = $pdo->prepare('SELECT 1 FROM users WHERE ?=?');
     $stmt->execute([$field, $value]);
-    if ($stmt->fetch()) {
+    if (!$stmt) {
         $errors[$errormsg] = true;
     }
 }
