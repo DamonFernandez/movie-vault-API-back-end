@@ -172,6 +172,18 @@ function changeMovieRatingInfoForMoviesTable($pdo, $movieID){
     queryDB($pdo, $query, [$movieRatingInfoArray["newMovieAvgRating"], $movieRatingInfoArray["newMovieVoteCount"], $movieID]);
 }
 
+function checkIfMovieExistsInCompletedWatchList($pdo, $completedWatchListID){
+    $query = "SELECT completedWatchListID from completedWatchList WHERE completedWatchListID = ?";
+    if(!queryDB($pdo, $query, [$completedWatchListID])){
+        sendResponse("This entry does not exist in your completed watch list", "404 Not Found");
+    }
+}
+function deleteMovieFromCompletedWatchList($pdo, $completedWatchListID){
+    $query = "DELETE FROM completedWatchList WHERE completedWatchListID = ?";
+    queryDB($pdo, $query, [$completedWatchListID]);
+    
+}
+
 function setResponse()
 {
 }
@@ -255,19 +267,25 @@ switch ($requestMethod) {
                 $query = "UPDATE completedWatchList SET numOfTimesWatched = numOfTimesWatched + 1, dateLastWatch = NOW() WHERE completedWatchListID = ?";
                 queryDB($pdo, $query, [$completedWatchListID]);
                 break;
-            default:
+            
+        
+            
+                default:
                 sendResponse("Your request was not a valid endpoint", "400 Bad Request");
+
         }
         break;
     case "DELETE":
         switch($endpoint){
             case "/completedwatchlist/entries/{id}":
+                $completedWatchListID = extractIDFromEndpoint($endpoint);
+                checkIfMovieExistsInCompletedWatchList($pdo, $completedWatchListID);
+                deleteMovieFromCompletedWatchList($pdo, $completedWatchListID);
+                sendResponse("Movie Was deleted from completed watch list", "200 OK");
 
-                function deleteMovieFromCompletedWatchList($pdo, $completedWatchListID){
-                    $query = "DELETE FROM completedWatchList WHERE completedWatchListID = ?";
-                    queryDB($pdo, $query, [$completedWatchListID]);
-                }
         }
+        default: 
+            sendResponse("Your request was not a valid endpoint", "400 Bad Request");
     default:
         sendResponse("Your request was not a valid endpoint", "400 Bad Request");
 }
