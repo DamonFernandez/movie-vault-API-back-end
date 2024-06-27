@@ -184,6 +184,62 @@ function deleteMovieFromCompletedWatchList($pdo, $completedWatchListID){
     
 }
 
+function combineUserStatsIntoArray($pdo, $userID){
+    $totalTimeWatched = getUserTotalTimeWatched($pdo, $userID);
+    $totalPlannedWatchTime = getUserPlannedWatchTime($pdo, $userID);
+    $userAvgRating = getUserAvgRating($pdo, $userID);
+    $totalNumOfTimesUserWatchedAMovie = getNumOfTimesUserWatchedAMovie($pdo, $userID);
+
+    return ["totalTimeWatched" => $totalTimeWatched,
+    "totalPlannedWatchTime" => $totalPlannedWatchTime,
+    "userAvgRating" => $userAvgRating,
+    "totalNumOfTimesUserWatchedAMovie" => $totalNumOfTimesUserWatchedAMovie];
+}
+
+function getUserTotalTimeWatched($pdo, $userID){
+    $query = "SELECT completedWatchList.numOfTimesWatched, movies.runtime FROM completedWatchList INNER JOIN movies using (movieID) WHERE userID = ?";
+    $queryResultSetObject = queryDB($pdo, $query, [$userID]);
+    $totalWatchedTime = 0;
+    foreach ($queryResultSetObject as $row) {
+        $totalWatchedTime += ($row["runtime"] * $row["numOfTimesWatched"]);
+    }
+    return $totalWatchedTime;
+}
+
+function getUserPlannedWatchTime($pdo, $userID){
+    $query = "SELECT movies.runtime FROM toWatchList INNER JOIN movies using (movieID) WHERE userID = ?";
+    $queryResultSetObject = queryDB($pdo, $query, [$userID]);
+    $totalPlannedWatchTime = 0;
+    foreach ($queryResultSetObject as $row) {
+        $totalPlannedWatchTime += $row["runtime"];
+    }
+    return $totalPlannedWatchTime;
+}
+
+function getUserAvgRating($pdo, $userID){
+    $query = "SELECT AVG(rating) AS userAvgRating FROM completedWatchList WHERE userID = ?";
+    $queryResultSetObject = queryDB($pdo, $query, [$userID]);
+    $row = $queryResultSetObject -> fetch();
+    if($row !== false){
+        $userAvgRating = $row["userAvgRating"];
+    }
+    else{
+        $userAvgRating = null;
+    }
+
+    return $userAvgRating;
+}
+
+function getNumOfTimesUserWatchedAMovie($pdo, $userID){
+    $query = "SELECT numOfTimesWatched FROM completedWatchList WHERE userID = ?";
+    $queryResultSetObject = queryDB($pdo, $query, [$userID]);
+    $totalTimesUserWatchedAMovie = 0;
+    foreach ($queryResultSetObject as $row) {
+        $totalTimesUserWatchedAMovie += $row["numOfTimesWatched"];
+    }
+    return $totalTimesUserWatchedAMovie;
+}
+
 function setResponse()
 {
 }
@@ -234,6 +290,13 @@ switch ($requestMethod) {
                 $result = $queryResultSetObject->fetch();
                 sendResponse($result, "200 OK");
                 break;
+            case "/users/{id}/stats":
+                $userID = extractIDFromEndpoint($endpoint);
+                $userStats = combineUserStatsIntoArray($pdo, $userID);
+                sendResponse($userStats, "200 OK");
+
+
+
             default:
                 sendResponse("Your request was not a valid endpoint", "400 Bad Request");
         }
