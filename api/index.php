@@ -4,9 +4,9 @@ function getEndPoint()
 {
     $uri = $_SERVER["REQUEST_URI"];
     $uri = parse_url($uri);
-    define('__BASE__', '/~damonfernandez/3430/cois-3430-2024su-a2-Blitzcranq/api/');
+    // define('__BASE__', '/~damonfernandez/3430/assn/cois-3430-2024su-a2-Blitzcranq/api/');
 
-    // define('__BASE__', '/~damonfernandez/3430/cois-3430-2024su-a2-Blitzcranq/api/');
+    define('__BASE__', '/~vrajchauhan/3430/assn/cois-3430-2024su-a2-Blitzcranq/api/');
     $endpoint = str_replace(__BASE__, "", $uri["path"]);
     return $endpoint;
 }
@@ -31,13 +31,11 @@ function getUserAPIKey($pdo)
 
 
     // Check if its valid
-    $stmt = $pdo->prepare("SELECT 1 FROM `users` WHERE `apikey` = ?");
+    $stmt = $pdo->prepare("SELECT 1 FROM `users` WHERE `api_key` = ?"); //changed this coz table has api_key not apikey
     $stmt->execute([$userApiKey]);
     $isValidApiKey = $stmt->fetchColumn();
     if ($isValidApiKey === false) {
-        header('HTTP/1.1 400 Bad Request');
-        echo json_encode(['error' => 'The provided API key is invalid']);
-        exit();
+        sendResponse(['error' =>  ' Your api key is not valid'], "401 Unauthorized");
     }
     return $userApiKey;
 }
@@ -46,22 +44,19 @@ function getUserAPIKey($pdo)
 
 function getUserID($pdo, $userApiKey)
 {
-    $query = "SELECT user_id FROM users WHERE api_key = ?";
+    $query = "SELECT userID FROM users WHERE api_key = ?";
     $queryResultSetObject = queryDB($pdo, $query, [$userApiKey]);
     $result = $queryResultSetObject->fetch();
-    return $result["user_id"];
+    return $result["userID"];
 }
 
 
-// Extract ID normally
-function extractIDFromEndpoint($endpoint)
+// Extract ID normally from an endpoint at a given index
+function extractIDFromEndpointAtIndex($endpoint, $index)
 {
     $explodedEndpoint = explode("/", $endpoint);
-    foreach ($explodedEndpoint as $string) {
-        if (str_starts_with($string, "{")) {
-            $stringToReturn = str_replace(['{', '}'], '', $string);;
-            return $stringToReturn;
-        }
+    if (isset($explodedEndpoint[$index])) {
+        return $explodedEndpoint[$index];
     }
 
     echo "Could not find an id ";
@@ -116,8 +111,12 @@ function validateSingleValForCompletedWatchListEntry($pdo, $thingToCheckFor)
     }
 }
 
+function validateSingleValFortoWatchListEntry($pdo)
+{
+}
 
-function validateWholeCompletedWatchListEntry($pdo)
+
+function validateWholeCompletedWatchList($pdo)
 {
     validateSingleValForCompletedWatchListEntry($pdo, "userID");
     validateSingleValForCompletedWatchListEntry($pdo, "movieID");
@@ -127,7 +126,23 @@ function validateWholeCompletedWatchListEntry($pdo)
     validateSingleValForCompletedWatchListEntry($pdo, "dateCompleted");
     validateSingleValForCompletedWatchListEntry($pdo, "numOfTimesWatched");
 }
-
+function validateWholetoWatchList($pdo)
+{
+    validateSingleValForCompletedWatchListEntry($pdo, "userID");
+    validateSingleValForCompletedWatchListEntry($pdo, "movieID");
+    validateSingleValForCompletedWatchListEntry($pdo, "priority");
+    validateSingleValForCompletedWatchListEntry($pdo, "notes");
+}
+function recordExsists($pdo, $table, $tableIDName, $tableID)
+{
+    $query = "SELECT 1 from ? WHERE ? = ? ";
+    $stmt = queryDB(
+        $pdo,
+        $query,
+        [$table, $tableIDName, $tableID]
+    );
+    return $stmt->fetch();
+}
 function setResponse()
 {
 }
@@ -145,75 +160,121 @@ if (!str_contains($endpoint, "movies") && !str_contains($endpoint, "users")) {
     // Exists if valid api key is not found, preventing non auth users
     // from doing any non-allowed requests
     $userApiKey = getUserAPIKey($pdo);
-    $user_id = getUserID($pdo, $userApiKey);
+    $userID = getUserID($pdo, $userApiKey);
 }
 
 switch ($requestMethod) {
     case "GET":
-        switch ($endpoint) {
-            case "/completedwatchlist/entries":
-                $query = "SELECT * FROM completedWatchList WHERE userID = ?";
-                $queryResultSetObject = queryDB($pdo, $query, [$user_id]);
-                $completedWatchList = $queryResultSetObject->fetchAll();
-                sendResponse($completedWatchList, "200 OK");
-                break;
-            case "/completedwatchlist/entries/{id}/times-watched":
-                $completedWatchListID = extractIDFromEndpoint($endpoint);
+        if ($endpoint == "completedwatchlist/entries") {
+            $query = "SELECT * FROM completedWatchList WHERE userID = ?";
+            $queryResultSetObject = queryDB($pdo, $query, [$userID]);
+            $completedWatchList = $queryResultSetObject->fetchAll();
+            sendResponse($completedWatchList, "200 OK");
+        } elseif (str_contains($endpoint, "completedwatchlist/entries/")) {
+            $completedWatchListID = extractIDFromEndpointAtIndex($endpoint, 3);
+            if (str_contains($endpoint, "times-watched") !== false) {
                 $query = "SELECT numOfTimesWatched FROM completedWatchList WHERE completedWatchListID = ?";
                 $queryResultSetObject = queryDB($pdo, $query, [$completedWatchListID]);
                 $result = $queryResultSetObject->fetch();
                 sendResponse($result, "200 OK");
-                break;
-            case "/completedwatchlist/entries/{id}/rating":
-                $completedWatchListID = extractIDFromEndpoint($endpoint);
+            } elseif (str_contains($endpoint, "rating") !== false) {
                 $query = "SELECT rating FROM completedWatchList WHERE completedWatchListID = ?";
                 $queryResultSetObject = queryDB($pdo, $query, [$completedWatchListID]);
                 $result = $queryResultSetObject->fetch();
                 sendResponse($result, "200 OK");
-                break;
-            case "/movies/{id}/rating":
-                $movieID = extractIDFromEndpoint($endpoint);
+            }
+        } elseif ($endpoint == "movies") {
+            $query = "SELECT * FROM movies";
+            $queryResultSetObject = queryDB($pdo, $query, []);
+            $movies = $queryResultSetObject->fetchAll();
+            sendResponse($movies, "200 OK");
+        } elseif (str_contains($endpoint, "movies/")) {
+            $movieID = extractIDFromEndpointAtIndex($endpoint, 1);
+            if (str_contains($endpoint, "rating")) {
                 $query = "SELECT rating FROM completedWatchList WHERE movieID = ?";
                 $queryResultSetObject = queryDB($pdo, $query, [$movieID]);
                 $result = $queryResultSetObject->fetch();
                 sendResponse($result, "200 OK");
-                break;
-            default:
-                sendResponse("Your request was not a valid endpoint", "400 Bad Request");
+            } else {
+                $query = "SELECT * FROM movies WHERE movieID = ?";
+                $queryResultSetObject = queryDB($pdo, $query, [$movieID]);
+                $result = $queryResultSetObject->fetch();
+                sendResponse($result, "200 OK");
+            }
+        } elseif ($endpoint == "toWatchList") {
+            $query = "SELECT * FROM toWatchList WHERE userID=?";
+            $queryResultSetObject = queryDB($pdo, $query, [$userID]);
+            $toWatchList = $queryResultSetObject->fetchAll();
+            sendResponse($toWatchList, "200 OK");
+        } else {
+            sendResponse("Your request was not a valid endpoint", "400 Bad Request");
         }
         break;
+
     case "POST":
-        switch ($endpoint) {
-            case "/completedwatchlist/entries":
-                validateWholeCompletedWatchListEntry($pdo);
-                $query = "INSERT INTO completedWatchList (userID, movieID, rating, notes, dateStarted, dateCompleted, numOfTimesWatched) VALUES (?, ?, ?, ?, ?, ?, ?)";
-                queryDB($pdo, $query, [
+        if ($endpoint == "completedwatchlist/entries") {
+            validateWholeCompletedWatchList($pdo);
+            $query = "INSERT INTO completedWatchList (userID, movieID, rating, notes, dateStarted, dateCompleted, numOfTimesWatched) VALUES (?, ?, ?, ?, ?, ?, ?)";
+            queryDB($pdo, $query, [
+                $_POST["userID"],
+                $_POST["movieID"],
+                $_POST["rating"],
+                $_POST["notes"],
+                $_POST["dateStarted"],
+                $_POST["dateCompleted"],
+                $_POST["numOfTimesWatched"]
+            ]);
+            sendResponse("Completed watchlist entry added", "201 Created");
+            // STILL NEED TO RECOMPUTE MOVIE AVG RATING, WITH THE NEW RATING THAT WAS ADDED 
+        } elseif ($endpoint == "toWatchList/entries") {
+            validateWholetoWatchList($pdo);
+            $query = "INSERT INTO toWatchList (userID,movieID,priority,notes) VALUES (?,?,?,?)";
+            queryDB(
+                $pdo,
+                $query,
+                [
                     $_POST["userID"],
                     $_POST["movieID"],
-                    $_POST["rating"],
-                    $_POST["notes"],
-                    $_POST["dateStarted"],
-                    $_POST["dateCompleted"],
-                    $_POST["numOfTimesWatched"]
-                ]);
-                sendResponse("Completed watchlist entry added", "201 Created");
-                // STILL NEED TO RECOMPUTE MOVIE AVG RATING, WITH THE NEW RATING THAT WAS ADDED 
-                break;
-            default:
-                sendResponse("Your request was not a valid endpoint", "400 Bad Request");
+                    $_POST["prioriy"],
+                    $_POST["notes"]
+                ]
+            );
+            sendResponse("ToWatchList Entry added", "201 Created");
+        } else {
+            sendResponse("Your request was not a valid endpoint", "400 Bad Request");
         }
         break;
+
     case "PATCH":
-        switch ($endpoint) {
-            case "/completedwatchlist/entries/{id}/times-watched":
-                $completedWatchListID = $endpoint;
-                $query = "UPDATE completedWatchList SET numOfTimesWatched = numOfTimesWatched + 1, dateLastWatch = NOW() WHERE completedWatchListID = ?";
-                queryDB($pdo, $query, [$completedWatchListID]);
-                break;
-            default:
-                sendResponse("Your request was not a valid endpoint", "400 Bad Request");
+        if (str_contains($endpoint, "completedwatchlist/entries/")) {
+            $completedWatchListID = extractIDFromEndpointAtIndex($endpoint, 2);
+            $query = "UPDATE completedWatchList SET numOfTimesWatched = numOfTimesWatched + 1, dateLastWatch = NOW() WHERE completedWatchListID = ?";
+            queryDB($pdo, $query, [$completedWatchListID]);
+            sendResponse(["" => "completedwatchList Entry updated"], "204 No Content");
+        } elseif (str_contains($endpoint, "toWatchList/entries/") && str_contains($endpoint, "priority")) {
+            $toWatchListID = extractIDFromEndpointAtIndex($endpoint, 2);
+            if (isset($_POST['priority'])) {
+            }
+        } else {
+            sendResponse("Your request was not a valid endpoint", "400 Bad Request");
         }
         break;
+    case "PUT":
+        if (str_contains($endpoint, "toWatchList/entries/")) {
+            validateWholetoWatchList($pdo);
+            $toWatchListID = extractIDFromEndpointAtIndex($endpoint, 2);
+            if (recordExsists($pdo, "toWatchList", "toWatchListID", $toWatchListID)) {
+            }
+            $query = "UPDATE toWatchList SET userID= ?, movieID=?, priority=?,notes=? WHERE toWatchListID=?";
+            queryDB($pdo, $query, [
+                $_POST["userID"],
+                $_POST["movieID"],
+                $_POST["prioriy"],
+                $_POST["notes"],
+                $toWatchListID
+            ]);
+            sendResponse(["" => "ToWatchList Entry updated"], "204 No Content");
+        }
     default:
-        sendResponse("Your request was not a valid endpoint", "400 Bad Request");
+        sendResponse(["errors" => "Your request method was not a valid method"], "400 Bad Request");
 }
