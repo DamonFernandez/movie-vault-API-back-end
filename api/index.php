@@ -329,9 +329,29 @@ switch ($requestMethod) {
                 $completedWatchListID = $endpoint;
                 $query = "UPDATE completedWatchList SET numOfTimesWatched = numOfTimesWatched + 1, dateLastWatch = NOW() WHERE completedWatchListID = ?";
                 queryDB($pdo, $query, [$completedWatchListID]);
+                setResponse("Updated times watched successfully", "200 OK");
+
                 break;
-            
-        
+
+            // Might need to change changeMovieRatingInfo() to work in this endpoint
+
+                case "/completedwatchlist/entries/{id}/rating":
+                    $completedWatchListID = extractIDFromEndpoint($endpoint);
+                    changeMovieRatingInfoForMoviesTable($pdo, $_POST["movieID"]);
+                    checkIfMovieExistsInCompletedWatchList($pdo, $completedWatchListID);
+    
+                    function changeUserRatingForMovie($pdo, $completedWatchListID){
+                        $query = "UPDATE completedWatchList SET rating = ? WHERE completedWatchListID = ? ";
+                        if(queryDB($pdo, $query, [$_POST["rating"], $completedWatchListID])){
+                            setResponse("Updated user rating for movie successfully", "200 OK");
+                        }
+                        else{
+                            setResponse("Failed to update user rating for movie", "400 Bad Request");
+                        }
+
+                    }
+
+                
             
                 default:
                 sendResponse("Your request was not a valid endpoint", "400 Bad Request");
