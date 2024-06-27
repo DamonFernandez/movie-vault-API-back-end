@@ -7,31 +7,29 @@ $username = $_POST['username'] ?? "";
 $email = $_POST['email'] ?? "";
 $password1 = $_POST['password'] ?? "";
 $password2 = $_POST['password2'] ?? "";
-global $errors;
 $errors = [];
-
-function validateField($field, $value, $errormsg)
-{
-    global $errors;
-    $pdo = connectdb();
-    $stmt = $pdo->prepare('SELECT 1 FROM users WHERE ?=?');
-    $stmt->execute([$field, $value]);
-    if (!$stmt) {
-        $errors[$errormsg] = true;
-    }
-}
 if (isset($_POST['submit'])) {
 
     if (empty($username)) {
         $errors['username_empty'] = true;
     } else {
-        validateField('username', $username, 'username_duplicate');
+        $query = 'SELECT 1 FROM users WHERE username=?';
+        $stmt = $pdo->prepare($query);
+        $stmt->execute([$username]);
+        if ($stmt->fetch()) {
+            $errors['username_duplicate'] = true;
+        }
     }
     //verify email is valid
     if (empty(filter_var($email, FILTER_VALIDATE_EMAIL))) {
         $errors['email'] = true;
     } else {
-        validateField('email', $email, 'email_duplicate');
+        $query = 'SELECT 1 FROM users WHERE email=?';
+        $stmt = $pdo->prepare($query);
+        $stmt->execute([$email]);
+        if ($stmt->fetch()) {
+            $errors['email_duplicate'] = true;
+        }
     }
     if ($password1 === $password2) {
         if (strlen($password1) < 7)

@@ -43,7 +43,7 @@ if (isset($_POST["apiRequestButton"])) {
     $message = issueNewAPIKey($pdo);
 }
 
-checkForLogOut();
+
 ?>
 
 <!DOCTYPE html>
@@ -72,7 +72,8 @@ checkForLogOut();
         <button type="submit" name="apiRequestButton">Request new API key</button>
         <p> <? $message ?>
         </p>
-        <?= createLogOutButton() ?>
+        <?php createLogOutButton();
+        checkForLogOut(); ?>
     </form>
 
 </body>
