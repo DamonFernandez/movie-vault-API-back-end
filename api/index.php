@@ -356,13 +356,29 @@ switch ($requestMethod) {
         break;
 
     case "PATCH":
-        if ($endpoint == "/completedwatchlist/entries/{id}/times-watched") {
-            $completedWatchListID = $endpoint;
-            $query = "UPDATE completedWatchList SET numOfTimesWatched = numOfTimesWatched + 1, dateLastWatch = NOW() WHERE completedWatchListID = ?";
-            queryDB($pdo, $query, [$completedWatchListID]);
+        if ($endpoint == "/completedwatchlist/entries/") {
+            if (str_contains($endpoint, "times-watched")) {
+                $completedWatchListID = $endpoint;
+                $query = "UPDATE completedWatchList SET numOfTimesWatched = numOfTimesWatched + 1, dateLastWatch = NOW() WHERE completedWatchListID = ?";
+                queryDB($pdo, $query, [$completedWatchListID]);
+                sendResponse("Updated times watched successfully", "200 OK");
+            } elseif (str_contains($endpoint, "rating")) {
+                $completedWatchListID = extractIDFromEndpointAtIndex($endpoint, 2);
+                changeMovieRatingInfoForMoviesTable($pdo, $_POST["movieID"]);
+                checkIfMovieExistsInCompletedWatchList($pdo, $completedWatchListID);
+
+                function changeUserRatingForMovie($pdo, $completedWatchListID)
+                {
+                    $query = "UPDATE completedWatchList SET rating = ? WHERE completedWatchListID = ? ";
+                    if (queryDB($pdo, $query, [$_POST["rating"], $completedWatchListID])) {
+                        sendResponse("Updated user rating for movie successfully", "200 OK");
+                    } else {
+                        sendResponse("Failed to update user rating for movie", "400 Bad Request");
+                    }
+                }
+            }
         } else
             sendResponse("Your request was not a valid endpoint", "400 Bad Request");
-
         break;
     case "PUT":
         if (str_contains($endpoint, "toWatchList/entries/")) {
