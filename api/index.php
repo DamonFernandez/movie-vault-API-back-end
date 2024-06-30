@@ -133,10 +133,11 @@ function recordExsists($pdo, $table, $tableIDName, $tableID)
     );
     return $stmt->fetch();
 }
-function getVoteInfoForMovie($pdo, $movieID){
+function getVoteInfoForMovie($pdo, $movieID)
+{
     $query = "SELECT movies.vote_average, movies.vote_count FROM movies WHERE movieID = ?";
     $movieVoteInfoObject = queryDB($pdo, $query, [$movieID]);
-    return $movieVoteInfoObject -> fetch();
+    return $movieVoteInfoObject->fetch();
 }
 function movieAvgRatingFormula($oldAvgRating, $oldRatingCount, $newRating, $oldRating = 0)
 {
@@ -157,61 +158,67 @@ function movieAvgRatingFormula($oldAvgRating, $oldRatingCount, $newRating, $oldR
 }
 
 
-function recalculateMoveRatingInfo($pdo, $movieID, $newUserRating){
+function recalculateMoveRatingInfo($pdo, $movieID, $newUserRating)
+{
     $movieVoteInfo = getVoteInfoForMovie($pdo, $movieID);
     $oldMovieVoteCount = $movieVoteInfo["vote_count"];
     $oldMovieVoteAvg = $movieVoteInfo["vote_average"];
     $queryToFindUserRating = "SELECT rating FROM completedWatchList WHERE watchListID = ?";
     $oldUserRatingObject = queryDB($pdo, $queryToFindUserRating, [$movieID]);
 
-    if(!$oldUserRatingObject){
+    if (!$oldUserRatingObject) {
         $newMovieVoteCount = 1 + $oldMovieVoteCount;
         $newMovieAvgRating = movieAvgRatingFormula($oldMovieVoteAvg, $oldMovieVoteCount, $newUserRating);
-    }
-    else{
-        $oldUserRatingArray = $oldUserRatingObject -> fetch();
+    } else {
+        $oldUserRatingArray = $oldUserRatingObject->fetch();
         $oldUserRating = $oldUserRatingArray["rating"];
         $newMovieAvgRating = movieAvgRatingFormula($oldMovieVoteAvg, $oldMovieVoteCount, $newUserRating, $oldUserRating);
         $newMovieVoteCount = $oldMovieVoteCount;
     }
-    
-    return ["newMovieAvgRating" => $newMovieAvgRating, "newMovieVoteCount" => $newMovieVoteCount ];
+
+    return ["newMovieAvgRating" => $newMovieAvgRating, "newMovieVoteCount" => $newMovieVoteCount];
 }
 
 
 
-function changeMovieRatingInfoForMoviesTable($pdo, $movieID){
+function changeMovieRatingInfoForMoviesTable($pdo, $movieID)
+{
     $movieRatingInfoArray = recalculateMoveRatingInfo($pdo, $movieID, $_POST["rating"]);
     $query = "UPDATE movies SET vote_average = ?, vote_count = ? WHERE movieID = ?";
-    
+
     queryDB($pdo, $query, [$movieRatingInfoArray["newMovieAvgRating"], $movieRatingInfoArray["newMovieVoteCount"], $movieID]);
 }
 
-function checkIfMovieExistsInCompletedWatchList($pdo, $completedWatchListID){
+function checkIfMovieExistsInCompletedWatchList($pdo, $completedWatchListID)
+{
     $query = "SELECT completedWatchListID from completedWatchList WHERE completedWatchListID = ?";
-    if(!queryDB($pdo, $query, [$completedWatchListID])){
+    if (!queryDB($pdo, $query, [$completedWatchListID])) {
         sendResponse("This entry does not exist in your completed watch list", "404 Not Found");
     }
 }
-function deleteMovieFromCompletedWatchList($pdo, $completedWatchListID){
+function deleteMovieFromCompletedWatchList($pdo, $completedWatchListID)
+{
     $query = "DELETE FROM completedWatchList WHERE completedWatchListID = ?";
     queryDB($pdo, $query, [$completedWatchListID]);
-    
 }
 
-function combineUserStatsIntoArray($pdo, $userID){
+function combineUserStatsIntoArray($pdo, $userID)
+{
     $totalTimeWatched = getUserTotalTimeWatched($pdo, $userID);
     $totalPlannedWatchTime = getUserPlannedWatchTime($pdo, $userID);
     $userAvgRating = getUserAvgRating($pdo, $userID);
     $totalNumOfTimesUserWatchedAMovie = getNumOfTimesUserWatchedAMovie($pdo, $userID);
 
-    return ["totalTimeWatched" => $totalTimeWatched,
-    "totalPlannedWatchTime" => $totalPlannedWatchTime,
-    "userAvgRating" => $userAvgRating,
-    "totalNumOfTimesUserWatchedAMovie" => $totalNumOfTimesUserWatchedAMovie];
+    return [
+        "totalTimeWatched" => $totalTimeWatched,
+        "totalPlannedWatchTime" => $totalPlannedWatchTime,
+        "userAvgRating" => $userAvgRating,
+        "totalNumOfTimesUserWatchedAMovie" => $totalNumOfTimesUserWatchedAMovie
+    ];
 }
 
-function getUserTotalTimeWatched($pdo, $userID){
+function getUserTotalTimeWatched($pdo, $userID)
+{
     $query = "SELECT completedWatchList.numOfTimesWatched, movies.runtime FROM completedWatchList INNER JOIN movies using (movieID) WHERE userID = ?";
     $queryResultSetObject = queryDB($pdo, $query, [$userID]);
     $totalWatchedTime = 0;
@@ -221,7 +228,8 @@ function getUserTotalTimeWatched($pdo, $userID){
     return $totalWatchedTime;
 }
 
-function getUserPlannedWatchTime($pdo, $userID){
+function getUserPlannedWatchTime($pdo, $userID)
+{
     $query = "SELECT movies.runtime FROM toWatchList INNER JOIN movies using (movieID) WHERE userID = ?";
     $queryResultSetObject = queryDB($pdo, $query, [$userID]);
     $totalPlannedWatchTime = 0;
@@ -231,21 +239,22 @@ function getUserPlannedWatchTime($pdo, $userID){
     return $totalPlannedWatchTime;
 }
 
-function getUserAvgRating($pdo, $userID){
+function getUserAvgRating($pdo, $userID)
+{
     $query = "SELECT AVG(rating) AS userAvgRating FROM completedWatchList WHERE userID = ?";
     $queryResultSetObject = queryDB($pdo, $query, [$userID]);
-    $row = $queryResultSetObject -> fetch();
-    if($row !== false){
+    $row = $queryResultSetObject->fetch();
+    if ($row !== false) {
         $userAvgRating = $row["userAvgRating"];
-    }
-    else{
+    } else {
         $userAvgRating = null;
     }
 
     return $userAvgRating;
 }
 
-function getNumOfTimesUserWatchedAMovie($pdo, $userID){
+function getNumOfTimesUserWatchedAMovie($pdo, $userID)
+{
     $query = "SELECT numOfTimesWatched FROM completedWatchList WHERE userID = ?";
     $queryResultSetObject = queryDB($pdo, $query, [$userID]);
     $totalTimesUserWatchedAMovie = 0;
@@ -315,18 +324,15 @@ switch ($requestMethod) {
             $queryResultSetObject = queryDB($pdo, $query, [$userID]);
             $toWatchList = $queryResultSetObject->fetchAll();
             sendResponse($toWatchList, "200 OK");
-        } elesif($endpoint == "users/" && str_contains($endpoint,"/stats")){
-            $userID = extractIDFromEndpoint($endpoint);
+        } elseif ($endpoint == "users/" && str_contains($endpoint, "/stats")) {
+            $userID = extractIDFromEndpointAtIndex($endpoint, 1);
             $userStats = combineUserStatsIntoArray($pdo, $userID);
             sendResponse($userStats, "200 OK");
-
-
+        } else {
+            sendResponse("Your request was not a valid endpoint", "400 Bad Request");
         }
-    else{
-                sendResponse("Your request was not a valid endpoint", "400 Bad Request");
-        }
+
         break;
-
     case "POST":
         if ($endpoint == "completedwatchlist/entries") {
             validateWholeCompletedWatchList($pdo);
@@ -340,39 +346,23 @@ switch ($requestMethod) {
                 $_POST["dateCompleted"],
                 $_POST["numOfTimesWatched"]
             ]);
-            if ($endpoint == "completedwatchlist/entries") {
-                validateWholeCompletedWatchList($pdo);
-                $query = "INSERT INTO completedWatchList (userID, movieID, rating, notes, dateStarted, dateCompleted, numOfTimesWatched) VALUES (?, ?, ?, ?, ?, ?, ?)";
-                queryDB($pdo, $query, [
-                    $_POST["userID"],
-                    $_POST["movieID"],
-                    $_POST["rating"],
-                    $_POST["notes"],
-                    $_POST["dateStarted"],
-                    $_POST["dateCompleted"],
-                    $_POST["numOfTimesWatched"]
-                ]);
-                sendResponse("Completed watchlist entry added", "201 Created");
-                // STILL NEED TO RECOMPUTE MOVIE AVG RATING, WITH THE NEW RATING THAT WAS ADDED 
-            } elseif ($endpoint == "toWatchList/entries") {
             sendResponse("Completed watchlist entry added", "201 Created");
             // STILL NEED TO RECOMPUTE MOVIE AVG RATING, WITH THE NEW RATING THAT WAS ADDED 
-        } elseif ($endpoint == "toWatchList/entries") {   
-            default:
-                sendResponse("Your request was not a valid endpoint", "400 Bad Request");
+        } elseif ($endpoint == "toWatchList/entries") {
+            sendResponse("Completed watchlist entry added", "201 Created");
+        } else {
+            sendResponse("Your request was not a valid endpoint", "400 Bad Request");
         }
         break;
 
     case "PATCH":
-        switch ($endpoint) {
-            case "/completedwatchlist/entries/{id}/times-watched":
-                $completedWatchListID = $endpoint;
-                $query = "UPDATE completedWatchList SET numOfTimesWatched = numOfTimesWatched + 1, dateLastWatch = NOW() WHERE completedWatchListID = ?";
-                queryDB($pdo, $query, [$completedWatchListID]);
-                break;
-            default:
-                sendResponse("Your request was not a valid endpoint", "400 Bad Request");
-        }
+        if ($endpoint == "/completedwatchlist/entries/{id}/times-watched") {
+            $completedWatchListID = $endpoint;
+            $query = "UPDATE completedWatchList SET numOfTimesWatched = numOfTimesWatched + 1, dateLastWatch = NOW() WHERE completedWatchListID = ?";
+            queryDB($pdo, $query, [$completedWatchListID]);
+        } else
+            sendResponse("Your request was not a valid endpoint", "400 Bad Request");
+
         break;
     case "PUT":
         if (str_contains($endpoint, "toWatchList/entries/")) {
@@ -391,15 +381,12 @@ switch ($requestMethod) {
             sendResponse(["" => "ToWatchList Entry updated"], "204 No Content");
         }
     case "DELETE":
-        switch($endpoint){
-            case "/completedwatchlist/entries/{id}":
-                $completedWatchListID = extractIDFromEndpoint($endpoint);
-                checkIfMovieExistsInCompletedWatchList($pdo, $completedWatchListID);
-                deleteMovieFromCompletedWatchList($pdo, $completedWatchListID);
-                sendResponse("Movie Was deleted from completed watch list", "200 OK");
-
-        }
-        default: 
+        if ($endpoint == "/completedwatchlist/entries/") {
+            $completedWatchListID = extractIDFromEndpointAtIndex($endpoint, 2);
+            checkIfMovieExistsInCompletedWatchList($pdo, $completedWatchListID);
+            deleteMovieFromCompletedWatchList($pdo, $completedWatchListID);
+            sendResponse("Movie Was deleted from completed watch list", "200 OK");
+        } else
             sendResponse("Your request was not a valid endpoint", "400 Bad Request");
     default:
         sendResponse(["errors" => "Your request method was not a valid method"], "400 Bad Request");
