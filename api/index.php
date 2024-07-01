@@ -311,8 +311,17 @@ switch ($requestMethod) {
                 sendResponse($result, "200 OK");
             }
         } elseif ($endpoint == "movies") {
-            $query = "SELECT * FROM movies";
-            $queryResultSetObject = queryDB($pdo, $query, []);
+            $filters = [];
+            $querybase = "SELECT * FROM movies";
+            $filteredQuery = "";
+            if (isset($_GET['language'])) {
+                $language = $_GET['language'] ?? "";
+                $filters['original_language'] = $language;
+                $filteredQuery = " WHERE original_language = ? ";
+            }
+            $query = $querybase . $filteredQuery;
+
+            $queryResultSetObject = queryDB($pdo, $query, array_values($filters));
             $movies = $queryResultSetObject->fetchAll();
             sendResponse($movies, "200 OK");
         } elseif (str_contains($endpoint, "movies/")) {
