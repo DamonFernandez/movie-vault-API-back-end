@@ -72,9 +72,12 @@ if (isset($_POST["apiRequestButton"])) {
         <button type="submit" name="apiRequestButton">Request new API key</button>
         <p> <? $message ?>
         </p>
-        <?php createLogOutButton();
-        checkForLogOut(); ?>
+
     </form>
+    <?php
+
+    createLogOutButton();
+    checkForLogOut(); ?>
 
 </body>
 

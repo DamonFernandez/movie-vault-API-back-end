@@ -170,3 +170,14 @@ h2 {
     margin: 0.5em 0;
     color: #eba980;
 }
+
+.logOut {
+    background-color: #faa169;
+    color: var(--link-color-hover);
+    border: none;
+    border-radius: 0.5em;
+    padding: 0.5em 1em;
+    cursor: pointer;
+    /* width: 10em; */
+    margin: 0.5em;
+}

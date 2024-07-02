@@ -54,7 +54,7 @@ function genAPIKey($pdo)
 function createLogOutButton()
 {
 
-  echo "<form method=\"GET\"><button type=\"submit\" name=\"logOutButton\">Log Out</button></form> ";
+  echo "<form method=\"GET\"><button type=\"submit\" name=\"logOutButton\" class=\"logOut\"> Log Out</button></form> ";
 }
 
 function logoutUser()
