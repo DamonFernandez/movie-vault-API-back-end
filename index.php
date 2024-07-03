@@ -25,37 +25,69 @@ checkToRedirectToLoginPage() ?>
         <section class="loginbox">
             <h2>Movies Table Endpoints</h2>
             <ul>
-                <li>GET & /movies/ - should return all movies.</li>
-                <li>GET & /movies/{id} - returns the movie data for a specific movie.</li>
-                <li>GET & /movies/{id}/rating - returns the rating value for a specific movie.</li>
+                <li>GET & /movies/ - Returns all movies.</li>
+                <li>GET & /movies/{id} - Returns the movie data for a specific movie.</li>
+                <li>GET & /movies/{id}/rating - Returns the rating value for a specific movie.</li>
             </ul>
         </section>
         <section class="loginbox">
             <h2>toWatchList Table Endpoints</h2>
             <ul>
-                <li>GET & /towatchlist/entries - requires an api key and returns all entries on the user's toWatchList.</li>
-                <li>POST & /towatchlist/entries - requires an api key and all other data necessary for the toWatchList table, validates then inserts the data.</li>
-                <li>PUT & /towatchlist/entries/{id} - requires an api key and all other data necessary for the toWatchList table and replaces the entire record in the database (if there is no record it should insert and return the appropriate HTTP code).</li>
-                <li>PATCH & /towatchlist/entries/{id}/priority - requires an api key and new priority and updates the user's priority for the appropriate movie.</li>
-                <li>DELETE & /towatchlist/entries/{id} - requires an api key and movieID and deletes the appropriate movie from the user's watchlist.</li>
+                <li>GET & /towatchlist/entries - Requires an API key. Returns all entries on the user's toWatchList.</li>
+                <li>POST & /towatchlist/entries - Requires an API key. Inserts a new entry into the toWatchList table. Required data:
+                    <ul>
+                        <li>userID</li>
+                        <li>movieID</li>
+                        <li>priority</li>
+                        <li>notes</li>
+                    </ul>
+                </li>
+                <li>PUT & /towatchlist/entries/{id} - Requires an API key. Replaces an entry in the toWatchList table or inserts a new one if it doesn't exist. Required data:
+                    <ul>
+                        <li>userID</li>
+                        <li>movieID</li>
+                        <li>priority</li>
+                        <li>notes</li>
+                    </ul>
+                </li>
+                <li>PATCH & /towatchlist/entries/{id}/priority - Requires an API key. Updates the priority of a specific movie in the toWatchList table. Required data:
+                    <ul>
+                        <li>priority</li>
+                    </ul>
+                </li>
+                <li>DELETE & /towatchlist/entries/{id} - Requires an API key. Deletes a specific movie from the user's toWatchList.</li>
             </ul>
         </section>
         <section class="loginbox">
             <h2>completedWatchList Table Endpoints</h2>
             <ul>
-                <li>GET & /completedwatchlist/entries - requires an api key and returns all entries on the user's completedWatchList.</li>
-                <li>GET & /completedwatchlist/entries/{id}/times-watched - requires an api key and returns the number of times the user has watched the given movie.</li>
-                <li>GET & /completedwatchlist/entries/{id}/rating - requires an api key and returns the user's rating for this specific movie.</li>
-                <li>POST & /completedwatchlist/entries - requires an api key and all other data necessary for the completedWatchList table, validates then inserts the data. It should also recompute and update the rating for the appropriate movie.</li>
-                <li>PATCH & /completedwatchlist/entries/{id}/rating - requires an api key and new rating and updates the rating for the appropriate movie in the completedWatchList table, then recalculates the movie's rating and updates the movies table.</li>
-                <li>PATCH & /completedwatchlist/entries/{id}/times-watched - requires an api key and increments the number of times watched and updates the last date watched of the appropriate movie.</li>
-                <li>DELETE & /completedwatchlist/entries/{id} - requires an api key and movieID and deletes the appropriate movie from the completedWatchList.</li>
+                <li>GET & /completedwatchlist/entries - Requires an API key. Returns all entries on the user's completedWatchList.</li>
+                <li>GET & /completedwatchlist/entries/{id}/times-watched - Requires an API key. Returns the number of times the user has watched the given movie.</li>
+                <li>GET & /completedwatchlist/entries/{id}/rating - Requires an API key. Returns the user's rating for a specific movie.</li>
+                <li>POST & /completedwatchlist/entries - Requires an API key. Inserts a new entry into the completedWatchList table and updates the movie's rating. Required data:
+                    <ul>
+                        <li>userID</li>
+                        <li>movieID</li>
+                        <li>rating</li>
+                        <li>notes</li>
+                        <li>dateStarted</li>
+                        <li>dateLastWatched</li>
+                        <li>numOfTimesWatched</li>
+                    </ul>
+                </li>
+                <li>PATCH & /completedwatchlist/entries/{id}/rating - Requires an API key. Updates the rating of a specific movie in the completedWatchList table and recalculates the movie's rating. Required data:
+                    <ul>
+                        <li>rating</li>
+                    </ul>
+                </li>
+                <li>PATCH & /completedwatchlist/entries/{id}/times-watched - Requires an API key. Increments the number of times watched and updates the last date watched of the appropriate movie.</li>
+                <li>DELETE & /completedwatchlist/entries/{id} - Requires an API key. Deletes a specific movie from the completedWatchList.</li>
             </ul>
         </section>
         <section class="loginbox">
-            <h2>user Table Endpoints</h2>
+            <h2>User Table Endpoints</h2>
             <ul>
-                <li>GET & /users/{id}/stats - returns basic watching stats for the provided user.</li>
+                <li>GET & /users/{id}/stats - Returns basic watching stats for the provided user.</li>
             </ul>
         </section>
     </main>

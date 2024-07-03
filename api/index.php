@@ -416,7 +416,6 @@ switch ($requestMethod) {
                 $_POST["dateLastWatched"],
                 $_POST["numOfTimesWatched"]
             ]);
-            // STILL NEED TO RECOMPUTE MOVIE AVG RATING, WITH THE NEW RATING THAT WAS ADDED 
             changeMovieRatingInfoForMoviesTable($pdo, $_POST["movieID"]);
             sendResponse([
                 $_POST["userID"],
@@ -460,9 +459,9 @@ switch ($requestMethod) {
             parse_str(file_get_contents("php://input"), $_POST);
 
             if (recordExists($pdo, "completedWatchList", 'movieID', $movieID)) {
-                // checkIfMovieExists($pdo, "movies", $movieID);
+                checkIfMovieExists($pdo, "movies", $movieID);
                 changeMovieRatingInfoForMoviesTable($pdo, $movieID);
-                // checkIfMovieExists($pdo, "completedWatchList", $movieID);
+                checkIfMovieExists($pdo, "completedWatchList", $movieID);
                 changeUserRatingForMovie($pdo, $movieID, $_POST);
                 sendResponse("Updated rating successfully", "200 OK");
             } else {
