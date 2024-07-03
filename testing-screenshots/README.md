@@ -6,28 +6,28 @@
 
 ### Creating an account
 
-![alt text](10.png)
-Redirected to login page: ![alt text](1.png)
-New account now exists in users table: ![alt text](2.png)
+![alt text](image-26.png)
+Redirected to login page: ![alt text](image-27.png)
+New account now exists in users table: ![alt text](image-28.png)
 
 ### Logging in with valid creds
 
-![alt text](3.png)
-Takes us to view account page: ![alt text](4.png)
+![alt text](image-29.png)
+Takes us to view account page: ![alt text](image-30.png)
 
 ### Logging in with invalid username
 
-![alt text](5.png)
+![alt text](image-31.png)
 
 ### Logging in with valid username but invalid password
 
-![alt text](6.png)
+![alt text](image-32.png)
 
 ### Requesting an new API key
 
-#### Before: ![alt text](7.png)
+#### Before:  ![alt text](image-30.png)
 
-#### After: ![alt text](8.png)
+#### After: ![alt text](image-33.png)
 
 # API Testing Documentation
 
