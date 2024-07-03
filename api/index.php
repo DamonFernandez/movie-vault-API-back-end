@@ -203,7 +203,7 @@ function checkIfMovieExists($pdo, $tbname, $movieID)
 {
     $query = "SELECT 1 from " . $tbname . " WHERE movieID = ?";
     if (!queryDB($pdo, $query, [$movieID])) {
-        sendResponse("This entry does not exist in your completed watch list", "404 Not Found");
+        sendResponse(["errors" => "This entry does not exist in your completed watch list"], "404 Not Found");
     }
 }
 function deleteMovie($pdo, $tbname, $movieID)
@@ -233,24 +233,11 @@ function changeUserRatingForMovie($pdo, $movieID, $input)
 {
     $query = "UPDATE completedWatchList SET rating = ? WHERE movieID = ? ";
     if (queryDB($pdo, $query, [$input["rating"], $movieID])) {
-        sendResponse("Updated user rating for movie successfully", "200 OK");
+        sendResponse(["" => "Updated user rating for movie successfully"], "200 OK");
     } else {
-        sendResponse("Failed to update user rating for movie", "400 Bad Request");
+        sendResponse(["errors" => "Failed to update user rating for movie"], "400 Bad Request");
     }
 }
-
-// function checkIfMovieExistsIntoWatchList($pdo, $completedWatchListID)
-// {
-//     $query = "SELECT toWatchListID from toWatchList WHERE toWatchListID = ?";
-//     if (!queryDB($pdo, $query, [$completedWatchListID])) {
-//         sendResponse("This entry does not exist in your to watch list", "404 Not Found");
-//     }
-// }
-// function deleteMovieFromtoWatchList($pdo, $completedWatchListID)
-// {
-//     $query = "DELETE FROM toWatchList WHERE toWatchListID = ?";
-//     queryDB($pdo, $query, [$completedWatchListID]);
-// }
 
 function combineUserStatsIntoArray($pdo, $userID)
 {
@@ -398,7 +385,7 @@ switch ($requestMethod) {
             $userStats = combineUserStatsIntoArray($pdo, $userID);
             sendResponse($userStats, "200 OK");
         } else {
-            sendResponse("Your request was not a valid endpoint", "400 Bad Request");
+            sendResponse(["errors" => "Your request was not a valid endpoint"], "400 Bad Request");
         }
 
         break;
@@ -441,9 +428,9 @@ switch ($requestMethod) {
                     $_POST["notes"]
                 ]
             );
-            sendResponse("ToWatchList Entry added", "201 Created");
+            sendResponse(["" => "ToWatchList Entry added"], "201 Created");
         } else {
-            sendResponse("Your request was not a valid endpoint", "400 Bad Request");
+            sendResponse(["errors" => "Your request was not a valid endpoint"], "400 Bad Request");
         }
         break;
 
@@ -453,7 +440,7 @@ switch ($requestMethod) {
             $movieID = $matches[1];
             $query = "UPDATE completedWatchList SET numOfTimesWatched = numOfTimesWatched + 1, dateLastWatched = NOW() WHERE movieID = ?";
             queryDB($pdo, $query, [$movieID]);
-            sendResponse("Updated times watched successfully", "200 OK");
+            sendResponse(["" => "Updated times watched successfully"], "200 OK");
         } elseif (preg_match($endpointRegexs['completedWatchListEntryRating'], $endpoint, $matches)) {
             $movieID = $matches[1];
             parse_str(file_get_contents("php://input"), $_POST);
@@ -463,9 +450,9 @@ switch ($requestMethod) {
                 changeMovieRatingInfoForMoviesTable($pdo, $movieID);
                 checkIfMovieExists($pdo, "completedWatchList", $movieID);
                 changeUserRatingForMovie($pdo, $movieID, $_POST);
-                sendResponse("Updated rating successfully", "200 OK");
+                sendResponse(["" => "Updated rating successfully"], "200 OK");
             } else {
-                sendResponse("Movie record not found in completed Watch list", "404 Not Found");
+                sendResponse(["errors" => "Movie record not found in completed Watch list"], "404 Not Found");
             }
             //toWatchlist PATCH
         } elseif (preg_match($endpointRegexs['toWatchListPriority'], $endpoint, $matches)) {
@@ -473,9 +460,9 @@ switch ($requestMethod) {
             parse_str(file_get_contents("php://input"), $input);
             $query = "UPDATE toWatchList SET priority = ? WHERE toWatchListID=?";
             queryDB($pdo, $query, [$input["priority"], $toWatchListID]);
-            sendResponse("Updated priority  successfully", "200 OK");
+            sendResponse(["" => "Updated priority successfully"], "200 OK");
         } else
-            sendResponse("Your request was not a valid endpoint", "400 Bad Request");
+            sendResponse(["errors" => "Your request was not a valid endpoint"], "400 Bad Request");
         break;
     case "PUT":
         //toWatchList PUT
@@ -493,7 +480,7 @@ switch ($requestMethod) {
                     $input["notes"],
                     $toWatchListID
                 ]);
-                sendResponse([], "204 No Content");
+                sendResponse("", "204 No Content");
             } else {
                 $query = "INSERT INTO toWatchList (userID,movieID,priority,notes,toWatchListID) VALUES (?,?,?,?,?)";
                 queryDB(
@@ -507,10 +494,16 @@ switch ($requestMethod) {
                         $toWatchListID
                     ]
                 );
-                sendResponse("ToWatchList Entry added", "201 Created");
+                sendResponse([
+                    $input["userID"],
+                    $input["movieID"],
+                    $input["priority"],
+                    $input["notes"],
+                    $toWatchListID
+                ], "201 Created");
             }
         } else
-            sendResponse("Your request was not a valid endpoint", "400 Bad Request");
+            sendResponse(["errors" => "Your request was not a valid endpoint"], "400 Bad Request");
         break;
 
 
@@ -520,15 +513,15 @@ switch ($requestMethod) {
             $movieID = $matches[1];
             checkIfMovieExists($pdo, "completedWatchList", $movieID);
             deleteMovie($pdo, "completedWatchList", $movieID);
-            sendResponse("Movie Was deleted from completed watch list", "200 OK");
+            sendResponse(["" => "Movie Was deleted from completed watch list"], "200 OK");
             //towatchlist DELETE
         } elseif (preg_match($endpointRegexs['toWatchListEntry'], $endpoint, $matches)) {
             $movieID = $matches[1];
             checkIfMovieExists($pdo, "toWatchList", $movieID);
             deleteMovie($pdo, "toWatchList", $movieID);
-            sendResponse("Movie Was deleted from to watch list", "200 OK");
+            sendResponse(["" => "Movie Was deleted from to watch list"], "200 OK");
         } else
-            sendResponse("Your request was not a valid endpoint", "400 Bad Request");
+            sendResponse(["errors" => "Your request was not a valid endpoint"], "400 Bad Request");
     default:
         sendResponse(["errors" => "Your request method was not a valid method"], "400 Bad Request");
 }
