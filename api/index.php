@@ -30,6 +30,7 @@ function getEndPoint()
 // Function to send the API response
 function sendResponse($data, $responseCode)
 {
+    header("Access-Control-Allow-Origin: *");
     header("HTTP/1.1 " . $responseCode);
     header("Content-Type: application/json; charset=UTF-8");
     $json_data = json_encode($data);
@@ -137,10 +138,10 @@ function validateWholetoWatchList($pdo)
     validateSingleValForCompletedWatchListEntry($pdo, "notes");
 }
 // Function to check for if a recordExists by taking in the related data 
-function recordExists($pdo, $table, $tableIDName, $tableID)
+function RecordExists($pdo, $table, $tableIDName, $tableID)
 {
 
-    $query = "SELECT 1 FROM " . $table . " WHERE " . $tableIDName . " = ?";
+    $query = "SELECT 1 FROM $table WHERE $tableIDName = ?";
     $result = queryDB($pdo, $query, [$tableID]);
     return $result->fetch();
 }
