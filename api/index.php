@@ -15,17 +15,19 @@ $endpointRegexes = [
     'toWatchListEntry' => '/^towatchlist\/entries\/(\d+)$/',
     'toWatchListPriority' => '/^towatchlist\/entries\/(\d+)\/priority$/',
     'userStats' => '/^users\/(\d+)\/stats$/',
-    'apiKey' => '/^apikey\?username=(\w+)&password=(\w+)$/'
+    'apikey' => '/^apikey$/'
 ];
 
 // Function to get the endpoint from the request URI
 function getEndPoint()
 {
     $uri = $_SERVER["REQUEST_URI"];
-    $uri = parse_url($uri);
-    define('__BASE__', '/~damonfernandez/3430/cois-3430-2024su-a2-Blitzcranq/api/');
 
-    $endpoint = str_replace(__BASE__, "", $uri["path"]);
+    $uri = parse_url($uri);
+    // define('__BASE__', '/~damonfernandez/3430/cois-3430-2024su-a2-Blitzcranq/api/');
+    define('__BASE__', '/~vrajchauhan/3430/assn/cois-3430-2024su-a2-Blitzcranq/api/');
+    $endpoint = str_replace(__BASE__, "", $uri['path']);
+
     return $endpoint;
 }
 
@@ -330,6 +332,8 @@ if (!str_contains($endpoint, "movies") && !str_contains($endpoint, "users") && !
 }
 switch ($requestMethod) {
     case "GET":
+        // echo preg_match($endpointRegexes['movie'], $endpoint);
+        // echo $endpoint;
         // completedWatchList GET requests
         if (preg_match($endpointRegexes['completedWatchListEntries'], $endpoint)) {
             // Fetch all completed watch list entries for a user
@@ -345,29 +349,28 @@ switch ($requestMethod) {
             $queryResultSetObject = queryDB($pdo, $query, [$movieID]);
             $result = $queryResultSetObject->fetch();
             sendResponse($result, "200 OK");
-        }
-        // else if(preg_match($endpointRegexes["apiKey"], $endpoint, $matches)){
-        //     $username = $matches[1];
-        //     $password = $matches[2];
-        //     $query = "SELECT * FROM `users` WHERE `username` = ?";
-
-        //     $stmt = $pdo->prepare($query);
-        //     $stmt->execute([$username]);
-        //     $dbrow = $stmt->fetch();
-        
-        //     if ($dbrow) {
-        //         if (password_verify($password, $dbrow['password'])) {
-        //             sendResponse(["apiKey" => $dbrow["api_key"]], "200 OK");
-        //         } else {
-        //             sendResponse(["errors" => "Incorrect Password"], "400 Bad Request");
-        //         }
-        //     } else {
-        //         sendResponse(["errors" => "Invalid Username"], "400 Bad Request");
-                
-        //     }
-
-        // }
-         else if (preg_match($endpointRegexes['completedWatchListEntryTimesWatched'], $endpoint, $matches)) {
+            //
+        } else if (preg_match($endpointRegexes["apikey"], $endpoint)) {
+            if (isset($_GET["username"]) && isset($_GET["password"])) {
+                $username = $_GET['username'] ?? "";
+                $password = $_GET['password'] ?? "";
+                $query = "SELECT * FROM `users` WHERE `username` = ?";
+                $stmt = $pdo->prepare($query);
+                $stmt->execute([$username]);
+                $dbrow = $stmt->fetch();
+                if ($dbrow) {
+                    if (password_verify($password, $dbrow['password'])) {
+                        sendResponse(["apiKey" => $dbrow["api_key"]], "200 OK");
+                    } else {
+                        sendResponse(["errors" => "Incorrect Password"], "400 Bad Request");
+                    }
+                } else {
+                    sendResponse(["errors" => "Invalid Username"], "400 Bad Request");
+                }
+            } else {
+                sendResponse(["errors" => "Your request was not a valid endpoint"], "400 Bad Request");
+            }
+        } else if (preg_match($endpointRegexes['completedWatchListEntryTimesWatched'], $endpoint, $matches)) {
             // Fetch the number of times a specific movie was watched
             $movieID = $matches[1];
             checkIfMovieExists($pdo, "completedWatchList", $movieID);
