@@ -14,7 +14,8 @@ $endpointRegexes = [
     'toWatchListEntries' => '/^towatchlist\/entries$/',
     'toWatchListEntry' => '/^towatchlist\/entries\/(\d+)$/',
     'toWatchListPriority' => '/^towatchlist\/entries\/(\d+)\/priority$/',
-    'userStats' => '/^users\/(\d+)\/stats$/'
+    'userStats' => '/^users\/(\d+)\/stats$/',
+    'apiKey' => '/^apikey\?username=(\w+)&password=(\w+)$/'
 ];
 
 // Function to get the endpoint from the request URI
@@ -22,7 +23,8 @@ function getEndPoint()
 {
     $uri = $_SERVER["REQUEST_URI"];
     $uri = parse_url($uri);
-    define('__BASE__', '/~vrajchauhan/3430/assn/cois-3430-2024su-a2-Blitzcranq/api/');
+    define('__BASE__', '/~damonfernandez/3430/cois-3430-2024su-a2-Blitzcranq/api/');
+
     $endpoint = str_replace(__BASE__, "", $uri["path"]);
     return $endpoint;
 }
@@ -316,9 +318,10 @@ $requestMethod = $_SERVER['REQUEST_METHOD'];
 $pdo = connectdb();
 
 
+
 // All endpoints that dont involve the movies table require an API key
 // So get it if the endpoint does not contain "movies" in its name
-if (!str_contains($endpoint, "movies") && !str_contains($endpoint, "users")) {
+if (!str_contains($endpoint, "movies") && !str_contains($endpoint, "users") && !str_contains($endpoint, "apikey")) {
     // Exists if valid api key is not found, preventing non auth users
     // from doing any non-allowed requests
     $userApiKey = getUserAPIKey($pdo);
@@ -341,7 +344,29 @@ switch ($requestMethod) {
             $queryResultSetObject = queryDB($pdo, $query, [$movieID]);
             $result = $queryResultSetObject->fetch();
             sendResponse($result, "200 OK");
-        } elseif (preg_match($endpointRegexes['completedWatchListEntryTimesWatched'], $endpoint, $matches)) {
+        }
+        // else if(preg_match($endpointRegexes["apiKey"], $endpoint, $matches)){
+        //     $username = $matches[1];
+        //     $password = $matches[2];
+        //     $query = "SELECT * FROM `users` WHERE `username` = ?";
+
+        //     $stmt = $pdo->prepare($query);
+        //     $stmt->execute([$username]);
+        //     $dbrow = $stmt->fetch();
+        
+        //     if ($dbrow) {
+        //         if (password_verify($password, $dbrow['password'])) {
+        //             sendResponse(["apiKey" => $dbrow["api_key"]], "200 OK");
+        //         } else {
+        //             sendResponse(["errors" => "Incorrect Password"], "400 Bad Request");
+        //         }
+        //     } else {
+        //         sendResponse(["errors" => "Invalid Username"], "400 Bad Request");
+                
+        //     }
+
+        // }
+         else if (preg_match($endpointRegexes['completedWatchListEntryTimesWatched'], $endpoint, $matches)) {
             // Fetch the number of times a specific movie was watched
             $movieID = $matches[1];
             checkIfMovieExists($pdo, "completedWatchList", $movieID);
