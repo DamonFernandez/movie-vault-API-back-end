@@ -224,13 +224,14 @@ function deleteMovie($pdo, $tbname, $movieID)
 // Function to filter the query based on a URL filter
 function filterIfExists($urlFilter, &$filters, &$filteredQuery)
 {
+    // echo isset($_GET['release_date']);
     if (isset($_GET[$urlFilter])) {
         $filter = $_GET[$urlFilter] ?? "";
         $filters[$urlFilter] = "%" . $filter . "%"; // Prepare the value for LIKE query
         if (str_contains($filteredQuery, "WHERE")) {
-            return $filteredQuery . " AND " . $urlFilter . " LIKE ?";
+            return $filteredQuery . " AND LOWER(" . $urlFilter . ") LIKE LOWER(?)";
         } else {
-            return $filteredQuery . " WHERE " . $urlFilter . " LIKE ?";
+            return $filteredQuery . " WHERE LOWER(" . $urlFilter . ") LIKE LOWER(?)";
         }
     }
     return $filteredQuery;
